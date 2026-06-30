@@ -1,0 +1,639 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --color-kraft: var(--kraft);
+  --color-kraft-foreground: var(--kraft-foreground);
+  --color-cream: var(--cream);
+  --color-forest: var(--forest);
+  --color-forest-foreground: var(--forest-foreground);
+  --color-clay: var(--clay);
+  --color-ink: var(--ink);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.5rem;
+  /* Brand palette: warm cream, kraft brown, deep forest, clay accent */
+  --cream: oklch(0.952 0.028 83);
+  --kraft: oklch(0.62 0.09 60);
+  --kraft-foreground: oklch(0.99 0.01 85);
+  --forest: oklch(0.32 0.045 155);
+  --forest-foreground: oklch(0.97 0.02 85);
+  --clay: oklch(0.62 0.16 35);
+  --ink: oklch(0.18 0.02 60);
+
+  --background: oklch(0.985 0.012 85);
+  --foreground: oklch(0.18 0.02 60);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.02 60);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 60);
+  --primary: oklch(0.32 0.045 155);
+  --primary-foreground: oklch(0.97 0.02 85);
+  --secondary: oklch(0.93 0.025 75);
+  --secondary-foreground: oklch(0.25 0.03 60);
+  --muted: oklch(0.94 0.018 80);
+  --muted-foreground: oklch(0.45 0.025 65);
+  --accent: oklch(0.62 0.16 35);
+  --accent-foreground: oklch(0.99 0.01 85);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.88 0.02 70);
+  --input: oklch(0.92 0.018 75);
+  --ring: oklch(0.32 0.045 155);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* Admin workspace — dark sidebar, light operational surfaces */
+  --admin-bg: oklch(0.955 0.017 82);
+  --admin-bg-texture: linear-gradient(135deg, oklch(0.985 0.014 86), oklch(0.935 0.024 78));
+  --admin-sidebar: color-mix(in oklab, var(--ink) 78%, var(--forest) 22%);
+  --admin-sidebar-surface: color-mix(in oklab, var(--forest) 36%, var(--ink) 64%);
+  --admin-sidebar-border: oklch(0.29 0.035 130);
+  --admin-sidebar-text: oklch(0.96 0.018 84);
+  --admin-sidebar-muted: oklch(0.76 0.034 82);
+  --admin-topbar: oklch(0.988 0.012 86 / 0.96);
+  --admin-surface: oklch(0.995 0.008 86);
+  --admin-surface-2: oklch(0.925 0.026 78);
+  --admin-border: oklch(0.84 0.028 72);
+  --admin-text: oklch(0.22 0.024 64);
+  --admin-muted: oklch(0.48 0.03 70);
+  --admin-accent: oklch(0.32 0.045 155);
+  --admin-accent-hover: oklch(0.52 0.07 155);
+  --admin-clay: oklch(0.62 0.16 35);
+  --admin-kraft: oklch(0.62 0.09 60);
+  --admin-shadow: 0 18px 44px oklch(0.35 0.05 70 / 0.16);
+}
+
+.dark {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.929 0.013 255.508);
+  --primary-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .font-display { font-family: var(--font-display); }
+  .text-balance { text-wrap: balance; }
+  .admin-shell input:focus,
+  .admin-shell textarea:focus,
+  .admin-shell select:focus {
+    border-color: var(--admin-accent) !important;
+    box-shadow: 0 0 0 2px oklch(from var(--admin-accent) l c h / 0.25);
+  }
+  .admin-shell table tbody tr:hover td {
+    background-color: var(--admin-surface-2);
+  }
+  .admin-shell button,
+  .admin-shell a,
+  .admin-shell input,
+  .admin-shell textarea,
+  .admin-shell select {
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+  }
+  .admin-shell button:hover,
+  .admin-shell a:hover {
+    transform: translateY(-1px);
+  }
+  .admin-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .admin-menu-btn,
+  .admin-sidebar-close {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--admin-border);
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    cursor: pointer;
+  }
+  .admin-sidebar-scrim {
+    display: none;
+  }
+  .admin-sidebar .admin-sidebar-close {
+    border-color: var(--admin-sidebar-border);
+    background: var(--admin-sidebar-surface);
+    color: var(--admin-sidebar-text);
+  }
+  .admin-card,
+  .admin-table-card,
+  .admin-empty-card {
+    box-shadow: var(--admin-shadow);
+  }
+  .admin-page-stack { display: grid; gap: 16px; }
+  .admin-panel { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; box-shadow: var(--admin-shadow); }
+  .admin-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 14px; }
+  .admin-input, .admin-select, .admin-textarea { background: var(--admin-bg); border: 1px solid var(--admin-border); border-radius: 9px; color: var(--admin-text); font: inherit; font-size: 13px; outline: none; padding: 9px 11px; width: 100%; }
+  .admin-textarea { min-height: 96px; resize: vertical; }
+  .admin-label { color: var(--admin-muted); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; }
+  .admin-btn { align-items: center; border: 1px solid var(--admin-border); border-radius: 8px; cursor: pointer; display: inline-flex; font: inherit; font-size: 12px; gap: 6px; justify-content: center; padding: 8px 12px; }
+  .admin-btn-primary { background: var(--admin-accent); border-color: var(--admin-accent); color: var(--cream); }
+  .admin-btn-ghost { background: var(--admin-surface); color: var(--admin-text); }
+  .admin-btn-danger { background: color-mix(in oklab, var(--admin-clay) 16%, var(--admin-surface)); border-color: var(--admin-clay); color: var(--admin-clay); }
+  .admin-table { border-collapse: collapse; width: 100%; }
+  .admin-table th { background: var(--admin-bg); border-bottom: 1px solid var(--admin-border); color: var(--admin-muted); font-size: 10.5px; letter-spacing: .1em; padding: 10px 12px; text-align: left; text-transform: uppercase; }
+  .admin-table td { border-bottom: 1px solid var(--admin-border); color: var(--admin-text); font-size: 12.5px; padding: 11px 12px; vertical-align: middle; }
+  .admin-empty { color: var(--admin-muted); padding: 36px; text-align: center; }
+  .admin-modal-backdrop { align-items: center; background: oklch(0.18 0.02 60 / .5); display: flex; inset: 0; justify-content: center; padding: 18px; position: fixed; z-index: 80; }
+  .admin-modal { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 16px; box-shadow: var(--admin-shadow); max-height: min(88dvh, 860px); overflow: auto; padding: 18px; width: min(920px, 100%); }
+  .admin-form-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-badge { border-radius: 999px; display: inline-flex; font-size: 10.5px; font-weight: 700; padding: 3px 8px; }
+  .admin-badge-muted { background: var(--admin-border); color: var(--admin-muted); }
+  .admin-badge-ok { background: color-mix(in oklab, var(--admin-accent) 34%, var(--admin-surface)); color: var(--admin-accent); }
+  .admin-tiptap { border: 1px solid var(--admin-border); border-radius: 10px; min-height: 180px; padding: 12px; }
+  .admin-tiptap p { margin: 0 0 10px; }
+  @media (max-width: 920px) {
+    .admin-menu-btn,
+    .admin-sidebar-close {
+      display: inline-flex;
+    }
+    .admin-sidebar {
+      position: fixed;
+      z-index: 50;
+      inset: 0 auto 0 0;
+      transform: translateX(-105%);
+      box-shadow: var(--admin-shadow);
+    }
+    .admin-sidebar.is-open {
+      transform: translateX(0);
+    }
+    .admin-sidebar-scrim {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      border: 0;
+      background: oklch(0.18 0.02 60 / 0.42);
+    }
+    .admin-shell main {
+      padding: 16px !important;
+    }
+    .admin-shell [data-admin-topbar-right] {
+      gap: 8px !important;
+    }
+    .admin-shell [data-admin-search] {
+      display: none !important;
+    }
+  }
+  @media (max-width: 1024px) {
+    .admin-shell [data-admin-editor-grid] {
+      grid-template-columns: 1fr !important;
+      max-width: none !important;
+    }
+  }
+  @media (max-width: 760px) {
+    .admin-shell form,
+    .admin-shell [data-admin-grid],
+    .admin-shell [data-admin-row],
+    .admin-shell [data-admin-stats],
+    .admin-shell [data-admin-editor-grid],
+    .admin-shell .admin-form-grid {
+      grid-template-columns: 1fr !important;
+      max-width: none !important;
+    }
+    .admin-shell [data-admin-toolbar],
+    .admin-shell [data-admin-actions],
+    .admin-shell [data-admin-pagination] {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+    .admin-shell [data-admin-search-input] {
+      width: 100% !important;
+    }
+    .admin-shell [data-admin-table-scroll] {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+    .admin-shell [data-admin-table-scroll] table {
+      min-width: 720px;
+    }
+    .admin-shell [data-admin-enquiry-row],
+    .admin-shell [data-admin-enquiry-head],
+    .admin-shell [data-admin-enquiry-skeleton] {
+      grid-template-columns: minmax(180px, 1.2fr) minmax(120px, 0.8fr) minmax(170px, 1fr) minmax(120px, 0.8fr) minmax(120px, 0.8fr) !important;
+    }
+    .admin-shell [data-admin-enquiry-check],
+    .admin-shell [data-admin-enquiry-action] {
+      display: none !important;
+    }
+    .admin-shell h1,
+    .admin-shell h2 {
+      font-size: clamp(20px, 5vw, 28px) !important;
+      line-height: 1.15 !important;
+      word-break: break-word;
+    }
+    .admin-shell input,
+    .admin-shell select,
+    .admin-shell textarea,
+    .admin-shell .admin-input,
+    .admin-shell .admin-select,
+    .admin-shell .admin-textarea {
+      max-width: 100% !important;
+      width: 100% !important;
+      box-sizing: border-box;
+    }
+    .admin-shell img {
+      max-width: 100%;
+      height: auto;
+    }
+    .admin-shell main {
+      padding: 14px !important;
+    }
+    .admin-shell [data-admin-topbar-right] {
+      gap: 6px !important;
+    }
+    .admin-shell [data-admin-topbar-title] {
+      font-size: 18px !important;
+    }
+    .admin-shell .admin-modal {
+      padding: 14px !important;
+      border-radius: 12px !important;
+    }
+    .admin-shell .admin-modal-backdrop {
+      padding: 8px !important;
+    }
+  }
+  .grain {
+    background-image: radial-gradient(circle at 1px 1px, oklch(0.5 0.04 60 / 0.06) 1px, transparent 0);
+    background-size: 4px 4px;
+  }
+
+  /* Shimmer sweep — used by skeletons and progress bar */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-secondary);
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent 0,
+      oklch(1 0 0 / 0.45) 50%,
+      transparent 100%
+    );
+    animation: shimmer-sweep 1.6s infinite;
+  }
+  @keyframes shimmer-sweep {
+    100% { transform: translateX(100%); }
+  }
+
+  /* Progress bar shimmer highlight */
+  .progress-shimmer {
+    background-image: linear-gradient(
+      90deg,
+      var(--accent) 0%,
+      var(--kraft) 50%,
+      var(--accent) 100%
+    );
+    background-size: 200% 100%;
+    animation: progress-flow 1.4s linear infinite;
+    box-shadow: 0 0 10px oklch(from var(--accent) l c h / 0.6);
+  }
+  @keyframes progress-flow {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Inline progress bar — used inside buttons during actions */
+  .inline-progress-flow {
+    animation: inline-progress-slide 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+  @keyframes inline-progress-slide {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+
+  /* Splash logo themed shimmer — sweeps an accent/kraft highlight across the logo */
+  .splash-logo-wrap {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    border-radius: 0.75rem;
+  }
+  .splash-logo-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(
+      110deg,
+      transparent 30%,
+      oklch(from var(--accent) l c h / 0.55) 50%,
+      oklch(from var(--kraft) l c h / 0.4) 55%,
+      transparent 70%
+    );
+    transform: translateX(-100%);
+    animation: splash-flow 1.8s ease-in-out infinite;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+  .splash-tagline {
+    background-image: linear-gradient(
+      90deg,
+      var(--muted-foreground) 0%,
+      var(--accent) 50%,
+      var(--muted-foreground) 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: splash-flow 2.2s ease-in-out infinite;
+  }
+  @keyframes splash-flow {
+    0% { transform: translateX(-100%); background-position: 100% 0; }
+    100% { transform: translateX(100%); background-position: -100% 0; }
+  }
+
+  .scrollbar-hide { scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  /* Horizontal marquee — translate by exactly half because the rail
+     duplicates its items, producing a seamless infinite loop. */
+  @keyframes marquee-x {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [style*="marquee-x"] { animation: none !important; }
+  }
+}
+
+/* ---- Print receipts (Phase 6) ----
+   When printing, hide everything except .mpk-print-area so the PrintReceipt
+   block IS the printed page. The component stays display:none on screen and
+   becomes block when @media print kicks in. */
+@media print {
+  body * { visibility: hidden !important; }
+  .mpk-print-area, .mpk-print-area * { visibility: visible !important; }
+  .mpk-print-area {
+    position: absolute !important;
+    inset: 0 !important;
+    background: #ffffff !important;
+    color: #000 !important;
+    padding: 24px !important;
+  }
+}
+
+@keyframes admin-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+
+/* ---- Legal pages prose ---- */
+.legal-prose > * + * { margin-top: 1rem; }
+.legal-prose p { line-height: 1.7; }
+.legal-prose h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+  margin-top: 1.5rem;
+}
+.legal-prose ul, .legal-prose ol {
+  padding-left: 0;
+  list-style: none;
+}
+.legal-prose ul > li, .legal-prose ol > li {
+  position: relative;
+  padding-left: 1.5rem;
+  line-height: 1.7;
+}
+.legal-prose ul > li + li, .legal-prose ol > li + li { margin-top: 0.5rem; }
+.legal-prose ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  top: 0.75rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--accent);
+}
+.legal-prose ol { counter-reset: legal-ol; }
+.legal-prose ol > li { counter-increment: legal-ol; }
+.legal-prose ol > li::before {
+  content: counter(legal-ol) ".";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--accent);
+}
+.legal-prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.legal-prose a:hover { text-decoration-thickness: 2px; }
+.legal-prose strong { color: var(--foreground); font-weight: 600; }
+.legal-prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  background: var(--muted);
+  color: var(--foreground);
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
+}
+.legal-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-top: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.legal-prose thead { background: var(--muted); }
+.legal-prose th, .legal-prose td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+.legal-prose tr:last-child td { border-bottom: 0; }
+.legal-prose th { font-weight: 600; color: var(--foreground); }
+
+/* Admin: hide low-priority table columns on small screens */
+.admin-show-mobile { display: none; }
+@media (max-width: 640px) {
+  .admin-hide-mobile { display: none !important; }
+  .admin-show-mobile { display: block; }
+  .admin-hide-on-mobile-table { display: none !important; }
+}
+
+/* Admin: queue mobile card list */
+.admin-card-list { display: grid; gap: 10px; }
+.admin-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+}
+.admin-card-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+.admin-card-row b { font-family: var(--font-display); }
+.admin-card-actions { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 4px; }
+
+/* Admin: tighter mobile (sub-480) */
+@media (max-width: 480px) {
+  .admin-shell main { padding: 10px !important; }
+  .admin-shell [data-admin-topbar-title] { font-size: 16px !important; }
+  .admin-shell [data-admin-topbar-right] { gap: 4px !important; }
+  .admin-shell .admin-panel { border-radius: 10px; }
+  .admin-table th, .admin-table td { padding: 8px 8px; font-size: 12px; }
+  .admin-card { padding: 12px; border-radius: 10px; }
+  .admin-btn { padding: 9px 12px; font-size: 13px; min-height: 38px; }
+}
+
+/* Admin: ensure topbar wraps gracefully on narrow screens */
+@media (max-width: 640px) {
+  .admin-shell [data-admin-topbar-right] { flex-wrap: wrap; justify-content: flex-end; }
+}
+
+/* Section heading helper used by dispatch queue */
+.admin-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px 6px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.admin-section-heading .admin-badge { text-transform: none; letter-spacing: 0; }
+

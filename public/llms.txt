@@ -1,0 +1,14 @@
+# Moments Packaging Kenya
+
+> Nairobi-based custom paper packaging manufacturer. We make branded bags, boxes, cups, mailers, labels and gifting packaging for Kenyan brands. Order online, pay with M-Pesa, delivered nationwide.
+
+## Pages
+
+- [Home](/): Order quality paper packaging online with same-day Nairobi delivery.
+- [Products](/products): Browse and configure custom packaging — bags, cups, boxes, mailers, labels, gifting.
+- [Industries](/industries): Packaging for Food & Beverage, Agriculture, Textile, E-commerce, Gifting, Beauty, Pharma and Industrial.
+- [About](/about): Our story, capacity and craftsmanship.
+- [Contact](/contact): Get a custom quote within 24 hours.
+- [Enterprise Quote](/enterprise-quote): Bulk orders above 10,000 units with dedicated pricing and account management.
+- [Blog](/blog): Articles on packaging design, materials and Kenyan brand stories.
+- [Track Order](/orders/track): Look up an existing order.
