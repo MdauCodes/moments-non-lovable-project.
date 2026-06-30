@@ -10,6 +10,20 @@ import { ConfiguratorModal } from "@/components/ConfiguratorModal";
 
 import { api } from "@/services/api";
 import { categories, WHATSAPP_NUMBER } from "@/data/products";
+
+// Quick-find terms shown as chips when a specific industry is selected.
+// Each entry is a short search query that maps to obvious product types
+// for that customer persona, letting them drill down in one tap.
+const INDUSTRY_QUICK_FINDS: Record<string, string[]> = {
+  "food-and-beverage":   ["cups", "pizza box", "foil tray", "straws", "cutlery", "greaseproof paper", "thermal rolls"],
+  "retail-and-ecommerce":["shopping bags", "thermal rolls", "kraft bags", "punnets", "cold cups"],
+  "health-and-beauty":   ["gloves", "face masks", "pharmacy bags", "jars", "non-woven bags", "hairnets"],
+  "agriculture":         ["panel sacks", "punnets", "cling film", "net bags", "honey jars"],
+  "manufacturing":       ["tapes", "garbage bags", "gloves", "aluminium foil", "stretch wrap"],
+  "hospitality":         ["plates", "cups", "cutlery", "napkins", "foil trays", "garbage bags"],
+  "fashion-and-apparel": ["kraft bags", "smart bags", "non-woven bags", "twisted handle"],
+  "electronics":         ["bubble wrap", "tapes", "bags", "stretch wrap"],
+};
 import type { Product, Industry } from "@/data/products";
 import { getStockInfo } from "@/lib/stock";
 import { MOCK_PRODUCTS } from "@/data/mockProducts";
@@ -449,21 +463,42 @@ function ProductsPage() {
 
         {/* Context banner: shows which industry is active */}
         {selectedIndustry && !isLoading && (
-          <div className="mt-4 flex items-center justify-between rounded-xl bg-primary/8 px-4 py-3">
-            <div>
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Showing packaging for</p>
-              <p className="mt-0.5 text-sm font-semibold text-foreground">{selectedIndustry.name}</p>
-              {selectedIndustry.description && (
-                <p className="mt-0.5 text-xs text-muted-foreground">{selectedIndustry.description}</p>
-              )}
+          <div className="mt-4 rounded-xl bg-primary/8 px-4 py-3">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Showing packaging for</p>
+                <p className="mt-0.5 text-sm font-semibold text-foreground">{selectedIndustry.name}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setParam("industry", undefined)}
+                className="ml-4 shrink-0 text-xs font-medium text-primary hover:underline"
+              >
+                See all
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setParam("industry", undefined)}
-              className="ml-4 shrink-0 text-xs font-medium text-primary hover:underline"
-            >
-              See all
-            </button>
+            {/* Quick-find chips — one tap to search a specific product type */}
+            {INDUSTRY_QUICK_FINDS[selectedIndustry.slug] && (
+              <div className="mt-3">
+                <p className="mb-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">Quick find</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {INDUSTRY_QUICK_FINDS[selectedIndustry.slug].map((term) => (
+                    <button
+                      key={term}
+                      type="button"
+                      onClick={() => { setQuery(term); setSearchResults(null); }}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                        query === term
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-background border border-border text-foreground hover:border-primary/40 hover:bg-primary/5"
+                      }`}
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -588,7 +623,17 @@ function ProductsPage() {
           </div>
         ) : (
           <>
-            <div className="mt-8 grid animate-in fade-in grid-cols-2 gap-3 duration-300 sm:mt-10 sm:gap-5 md:grid-cols-3 lg:gap-6">
+            {/* Result count */}
+            {grid.length > 0 && (
+              <p className="mt-6 text-xs text-muted-foreground">
+                {searchResults
+                  ? `${grid.length} result${grid.length === 1 ? "" : "s"} for "${query}"`
+                  : selectedIndustry
+                  ? `${grid.length}${hasMore ? "+" : ""} product${grid.length === 1 ? "" : "s"} for ${selectedIndustry.name}`
+                  : `${grid.length}${hasMore ? "+" : ""} product${grid.length === 1 ? "" : "s"}`}
+              </p>
+            )}
+            <div className="mt-4 grid animate-in fade-in grid-cols-2 gap-3 duration-300 sm:mt-5 sm:gap-5 md:grid-cols-3 lg:gap-6">
               {grid.map((p) => (
                 <ProductCard key={p.id} product={p} onConfigure={handleConfigure} />
               ))}
