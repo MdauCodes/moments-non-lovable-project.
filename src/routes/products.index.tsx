@@ -11,18 +11,66 @@ import { ConfiguratorModal } from "@/components/ConfiguratorModal";
 import { api } from "@/services/api";
 import { categories, WHATSAPP_NUMBER } from "@/data/products";
 
-// Quick-find terms shown as chips when a specific industry is selected.
-// Each entry is a short search query that maps to obvious product types
-// for that customer persona, letting them drill down in one tap.
-const INDUSTRY_QUICK_FINDS: Record<string, string[]> = {
-  "food-and-beverage":   ["cups", "pizza box", "foil tray", "straws", "cutlery", "greaseproof paper", "thermal rolls"],
-  "retail-and-ecommerce":["shopping bags", "thermal rolls", "kraft bags", "punnets", "cold cups"],
-  "health-and-beauty":   ["gloves", "face masks", "pharmacy bags", "jars", "non-woven bags", "hairnets"],
-  "agriculture":         ["panel sacks", "punnets", "cling film", "net bags", "honey jars"],
-  "manufacturing":       ["tapes", "garbage bags", "gloves", "aluminium foil", "stretch wrap"],
-  "hospitality":         ["plates", "cups", "cutlery", "napkins", "foil trays", "garbage bags"],
-  "fashion-and-apparel": ["kraft bags", "smart bags", "non-woven bags", "twisted handle"],
-  "electronics":         ["bubble wrap", "tapes", "bags", "stretch wrap"],
+// Customer-intent chips shown when an industry is selected.
+// label = plain English the customer thinks in.
+// search = backend keyword that returns the right products.
+const INDUSTRY_QUICK_FINDS: Record<string, Array<{ label: string; search: string }>> = {
+  "food-and-beverage": [
+    { label: "Serving hot drinks",          search: "hot cup" },
+    { label: "Cold drinks & juice bar",     search: "cold cup" },
+    { label: "Takeaway & delivery orders",  search: "takeaway box" },
+    { label: "Baked goods & pastry",        search: "cake" },
+    { label: "POS & billing receipts",      search: "thermal roll" },
+    { label: "Cutlery & plates",            search: "cutlery" },
+    { label: "Straws & stirrers",           search: "straw" },
+    { label: "Wrapping food",               search: "cling film" },
+  ],
+  "retail-and-ecommerce": [
+    { label: "Customer carry bags",         search: "shopping bag" },
+    { label: "POS receipt paper",           search: "thermal roll" },
+    { label: "Fresh produce display",       search: "punnet" },
+    { label: "Cold drinks & juice",         search: "cold cup" },
+    { label: "Mailers & courier packaging", search: "mailer" },
+  ],
+  "health-and-beauty": [
+    { label: "Dispensing & pharmacy bags",  search: "pharmacy bag" },
+    { label: "Gloves & hand protection",    search: "gloves" },
+    { label: "Face masks & safety",         search: "face mask" },
+    { label: "Cosmetics & skincare jars",   search: "jar" },
+    { label: "Salon & spa carry bags",      search: "non-woven" },
+    { label: "Hairnets & food hygiene",     search: "hairnet" },
+  ],
+  "agriculture": [
+    { label: "Storing grain & cereals",     search: "panel sack" },
+    { label: "Packaging fresh produce",     search: "punnet" },
+    { label: "Keeping produce fresh",       search: "cling film" },
+    { label: "Netting for fresh fruit",     search: "net bag" },
+    { label: "Honey & bee products",        search: "honey jar" },
+  ],
+  "manufacturing": [
+    { label: "Sealing & securing goods",    search: "tape" },
+    { label: "Worker safety & PPE",         search: "gloves" },
+    { label: "Bulk storage & transport",    search: "woven sack" },
+    { label: "Pallet & stretch wrapping",   search: "stretch wrap" },
+    { label: "Foil & barrier lining",       search: "aluminium foil" },
+  ],
+  "hospitality": [
+    { label: "Serving food (plates & cutlery)", search: "plates" },
+    { label: "Hot & cold cups",             search: "cups" },
+    { label: "Event & banquet catering",    search: "foil tray" },
+    { label: "Takeaway & room service",     search: "takeaway" },
+    { label: "Napkins & table linen",       search: "napkin" },
+    { label: "Waste & housekeeping",        search: "garbage bag" },
+  ],
+  "fashion-and-apparel": [
+    { label: "Boutique shopping bags",      search: "twisted handle" },
+    { label: "Reusable carry bags",         search: "non-woven" },
+    { label: "Premium gift packaging",      search: "millinary" },
+  ],
+  "electronics": [
+    { label: "Protective wrapping",         search: "bubble" },
+    { label: "Sealing boxes & cartons",     search: "tape" },
+  ],
 };
 import type { Product, Industry } from "@/data/products";
 import { getStockInfo } from "@/lib/stock";
@@ -294,7 +342,7 @@ function ProductsPage() {
 
   // Active filter chips
   const chips: Array<{ label: string; clear: () => void }> = [];
-  if (selectedIndustry) chips.push({ label: selectedIndustry.name, clear: () => setParam("industry", undefined) });
+  // Industry is shown in the context banner below — skip adding it here to avoid duplication.
   if (category) {
     const cat = CATEGORY_OPTIONS.find((c) => c.value === category);
     chips.push({ label: cat?.label ?? category, clear: () => setParam("category", undefined) });
@@ -477,23 +525,23 @@ function ProductsPage() {
                 See all
               </button>
             </div>
-            {/* Quick-find chips — one tap to search a specific product type */}
+            {/* What do you need chips — plain-English needs, not product names */}
             {INDUSTRY_QUICK_FINDS[selectedIndustry.slug] && (
               <div className="mt-3">
-                <p className="mb-1.5 text-[10px] uppercase tracking-widest text-muted-foreground">Quick find</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {INDUSTRY_QUICK_FINDS[selectedIndustry.slug].map((term) => (
+                <p className="mb-2 text-[11px] text-muted-foreground">What do you need?</p>
+                <div className="flex flex-wrap gap-2">
+                  {INDUSTRY_QUICK_FINDS[selectedIndustry.slug].map((item) => (
                     <button
-                      key={term}
+                      key={item.search}
                       type="button"
-                      onClick={() => { setQuery(term); setSearchResults(null); }}
-                      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                        query === term
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-background border border-border text-foreground hover:border-primary/40 hover:bg-primary/5"
+                      onClick={() => { setQuery(item.search); setSearchResults(null); }}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                        query === item.search
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-primary/5"
                       }`}
                     >
-                      {term}
+                      {item.label}
                     </button>
                   ))}
                 </div>
