@@ -9,7 +9,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { ConfiguratorModal } from "@/components/ConfiguratorModal";
 
 import { api } from "@/services/api";
-import { categories } from "@/data/products";
+import { categories, WHATSAPP_NUMBER } from "@/data/products";
 import type { Product, Industry } from "@/data/products";
 import { getStockInfo } from "@/lib/stock";
 import { MOCK_PRODUCTS } from "@/data/mockProducts";
@@ -305,10 +305,10 @@ function ProductsPage() {
         <div className="mx-auto max-w-7xl px-5 py-10 sm:py-14 lg:px-8 lg:py-16">
           <p className="text-[11px] uppercase tracking-[0.25em] text-primary">Catalogue</p>
           <h1 className="mt-3 font-display text-4xl font-medium text-foreground sm:text-5xl">
-            Shop packaging
+            Find packaging for your business
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Browse, configure and order branded paper packaging online. From 100 units.
+            Filter by your business type, or search for what you need. Minimum 100 units, delivered in Nairobi.
           </p>
         </div>
       </section>
@@ -322,7 +322,7 @@ function ProductsPage() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search packaging products..."
+              placeholder="Search products — e.g. pizza box, coffee cups, mifuko, cling film..."
               className="w-full rounded-xl border border-border bg-background px-4 py-3 pl-10 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
             {query && (
@@ -342,17 +342,19 @@ function ProductsPage() {
         <div className="scrollbar-hide mt-4 flex items-center gap-2 overflow-x-auto pb-3">
           {industries.map((ind) => {
             const active = selectedIndustry?.id === ind.id;
+            const Icon = ind.icon;
             return (
               <button
                 key={ind.id}
                 type="button"
                 onClick={() => toggleIndustry(ind.slug)}
-                className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-xs font-medium transition-colors ${
                   active
                     ? "bg-primary text-primary-foreground"
-                    : "border border-foreground/20 bg-cream text-foreground hover:border-foreground/40"
+                    : "border border-foreground/20 bg-cream text-foreground hover:border-primary/40 hover:bg-primary/5"
                 }`}
               >
+                {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
                 {ind.name}
               </button>
             );
@@ -445,6 +447,62 @@ function ProductsPage() {
           </div>
         )}
 
+        {/* Context banner: shows which industry is active */}
+        {selectedIndustry && !isLoading && (
+          <div className="mt-4 flex items-center justify-between rounded-xl bg-primary/8 px-4 py-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Showing packaging for</p>
+              <p className="mt-0.5 text-sm font-semibold text-foreground">{selectedIndustry.name}</p>
+              {selectedIndustry.description && (
+                <p className="mt-0.5 text-xs text-muted-foreground">{selectedIndustry.description}</p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setParam("industry", undefined)}
+              className="ml-4 shrink-0 text-xs font-medium text-primary hover:underline"
+            >
+              See all
+            </button>
+          </div>
+        )}
+
+        {/* Browse by business type — shown when no filter active and data is loaded */}
+        {!anyFilterActive && !isLoading && !searchResults && industries.length > 0 && (
+          <div className="mt-8">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              What does your business do?
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              {industries.map((ind) => {
+                const Icon = ind.icon;
+                return (
+                  <button
+                    key={ind.id}
+                    type="button"
+                    onClick={() => toggleIndustry(ind.slug)}
+                    className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm"
+                  >
+                    {Icon && (
+                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/15">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground">{ind.name}</p>
+                      {ind.description && (
+                        <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                          {ind.description}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Subtle banner: API unreachable / 404 → showing mock catalogue. */}
         {!searchResults && loadState === "fallback" && !isLoading && (
           <div className="mt-6 rounded-lg border border-border/60 bg-muted/40 px-4 py-2.5 text-xs text-muted-foreground">
@@ -499,16 +557,34 @@ function ProductsPage() {
             </Link>
           </div>
         ) : grid.length === 0 ? (
-          <div className="mt-16 rounded-2xl border border-dashed border-border p-16 text-center">
-            <h3 className="font-display text-2xl text-foreground">No products found</h3>
-            <p className="mt-2 text-sm text-muted-foreground">Try adjusting your filters.</p>
-            <button
-              type="button"
-              onClick={clearAll}
-              className="mt-5 inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              Clear filters
-            </button>
+          <div className="mt-16 rounded-2xl border border-dashed border-border p-12 text-center">
+            <h3 className="font-display text-2xl text-foreground">
+              {selectedIndustry
+                ? `No products listed for ${selectedIndustry.name} yet`
+                : "No products match your filters"}
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {selectedIndustry
+                ? "Try a different business type, or contact us — we may have unlisted stock."
+                : "Try adjusting your search or filters."}
+            </p>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={clearAll}
+                className="inline-flex items-center rounded-full border border-foreground/20 px-5 py-2.5 text-sm font-medium text-foreground hover:border-foreground/40"
+              >
+                Clear filters
+              </button>
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%2C%20I%20need%20packaging${selectedIndustry ? `%20for%20${encodeURIComponent(selectedIndustry.name)}` : ""}%20and%20can't%20find%20what%20I%20need%20on%20the%20website.`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                WhatsApp us
+              </a>
+            </div>
           </div>
         ) : (
           <>
