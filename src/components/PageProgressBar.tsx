@@ -1,22 +1,22 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
-
-/**
- * Editorial "drawing line" route-change indicator.
- *
- * On every route navigation, a thin clay line draws itself horizontally
- * across the very top of the viewport from left to right, then dissolves
- * once the new route has settled. No spinner, no pulse — feels like ink.
- *
- * Even if the new route resolves in <100ms, we hold the animation for a
- * minimum visible window so the user always perceives the transition.
- */
-const MIN_VISIBLE_MS = 650; // minimum time the line stays on screen
-const DRAW_MS = 900;        // duration of the initial 0 → 0.85 draw
+const MIN_VISIBLE_MS = 650;
+const DRAW_MS = 900;
 
 export function PageProgressBar() {
-  const status = useNavigation().state !== "idle" ? "pending" : "idle";
+  const location = useLocation();
+  const prevKey = useRef(location.key);
+  const [status, setStatus] = useState<"idle" | "pending">("idle");
+
+  useEffect(() => {
+    if (location.key !== prevKey.current) {
+      prevKey.current = location.key;
+      setStatus("pending");
+      const t = setTimeout(() => setStatus("idle"), 50);
+      return () => clearTimeout(t);
+    }
+  }, [location.key]);
   const [scale, setScale] = useState(0);
   const [opacity, setOpacity] = useState(0);
   const [duration, setDuration] = useState(0);
