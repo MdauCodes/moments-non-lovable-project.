@@ -143,7 +143,7 @@ export function EmailInsiderPrompt() {
       role="dialog"
       aria-labelledby="insider-prompt-title"
       aria-describedby="insider-prompt-desc"
-      className="fixed bottom-4 right-4 z-50 w-[calc(100vw-2rem)] max-w-sm animate-in slide-in-from-bottom-4 fade-in duration-300 sm:bottom-6 sm:right-6"
+      className="fixed bottom-20 right-4 z-50 w-[calc(100vw-2rem)] max-w-sm animate-in slide-in-from-bottom-4 fade-in duration-300 sm:bottom-6 sm:right-6"
     >
       <div className="relative overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl">
         {/* Decorative gradient header */}

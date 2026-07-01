@@ -6,7 +6,7 @@ import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { PageProgressBar } from "@/components/PageProgressBar";
 import { EmailInsiderPrompt } from "@/components/EmailInsiderPrompt";
 import { AppSplash } from "@/components/AppSplash";
-import { MobileFab } from "@/components/MobileFab";
+import { BottomNav } from "@/components/BottomNav";
 import { LatestBlogsStrip } from "@/components/blog/LatestBlogsStrip";
 import { ProductCardSkeleton } from "@/components/ProductCardSkeleton";
 import { ProductCard } from "@/components/ProductCard";
@@ -603,7 +603,17 @@ function CategoryRow() {
 }
 
 // ── Featured products ──
-function FeaturedProducts() {
+type ProductRowProps = {
+  eyebrow: string;
+  title: string;
+  seeAllHref?: string;
+  fetcher: () => Promise<Product[]>;
+  bg?: "background" | "cream";
+};
+
+/** A horizontally-scannable row of products — the homepage can stack several of these,
+ * matching the multi-row catalogue feel of Kilimall/Jumia-style marketplaces. */
+function ProductRow({ eyebrow, title, seeAllHref = "/products", fetcher, bg = "background" }: ProductRowProps) {
   const [products, setProducts] = useState<Product[] | null>(null);
   const [configuring, setConfiguring] = useState<Product | null>(null);
   const [preTier, setPreTier] = useState<string | null>(null);
@@ -614,10 +624,9 @@ function FeaturedProducts() {
 
   useEffect(() => {
     let cancelled = false;
-    api
-      .getRecommended()
+    fetcher()
       .then((data) => {
-        if (!cancelled) setProducts(data.slice(0, 4));
+        if (!cancelled) setProducts(data.slice(0, 8));
       })
       .catch(() => {
         if (!cancelled) setProducts([]);
@@ -625,33 +634,39 @@ function FeaturedProducts() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  if (products !== null && products.length === 0) return null;
+
   return (
-    <section className="bg-background">
-      <div className="mx-auto max-w-7xl px-5 py-14 sm:py-20 lg:px-8">
+    <section className={bg === "cream" ? "bg-cream" : "bg-background"}>
+      <div className="mx-auto max-w-7xl px-5 py-10 sm:py-14 lg:px-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-accent">Featured products</p>
-            <h2 className="mt-2 font-display text-3xl font-medium text-foreground sm:text-4xl">Popular this week</h2>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-accent">{eyebrow}</p>
+            <h2 className="mt-2 font-display text-2xl font-medium text-foreground sm:text-3xl">{title}</h2>
           </div>
           <Link
-            to="/products"
+            to={seeAllHref}
             className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:text-accent"
           >
-            Browse all products <ArrowRight className="h-4 w-4" />
+            See all <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
-          {products === null ? (
-            Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
-          ) : products.length === 0 ? (
-            <div className="col-span-4 py-12 text-center text-sm text-muted-foreground">
-              Products loading — check back shortly.
-            </div>
-          ) : (
-            products.map((p) => <ProductCard key={p.id} product={p} onConfigure={handleConfigure} />)
-          )}
+        {/* Horizontal scroll on mobile (app-style rail), grid from sm+ */}
+        <div className="mt-6 -mx-5 flex gap-3 overflow-x-auto px-5 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-5 sm:overflow-visible sm:px-0 md:grid-cols-4 lg:gap-6">
+          {products === null
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="w-[45vw] shrink-0 sm:w-auto">
+                  <ProductCardSkeleton />
+                </div>
+              ))
+            : products.map((p) => (
+                <div key={p.id} className="w-[45vw] shrink-0 sm:w-auto">
+                  <ProductCard product={p} onConfigure={handleConfigure} />
+                </div>
+              ))}
         </div>
         <ConfiguratorModal product={configuring} preSelectedTierId={preTier} onClose={() => setConfiguring(null)} />
       </div>
@@ -786,18 +801,37 @@ function HomePage() {
       <FirstVisitSplash />
       <PageProgressBar />
       <div className="flex min-h-screen flex-col" style={{ background: "var(--background)" }}>
-        <main className="flex-1">
+        <main className="flex-1 pb-16 md:pb-0">
           <Hero />
           <CategoryRow />
-          <FeaturedProducts />
+          <ProductRow
+            eyebrow="Featured products"
+            title="Popular this week"
+            fetcher={api.getRecommended}
+            bg="background"
+          />
+          <ProductRow
+            eyebrow="Just in"
+            title="New arrivals"
+            seeAllHref="/products?newArrivals=true"
+            fetcher={() => api.getProducts({ isNewArrival: true, size: 8 })}
+            bg="cream"
+          />
+          <ProductRow
+            eyebrow="Customer favourites"
+            title="Best sellers"
+            seeAllHref="/products?fastMoving=true"
+            fetcher={() => api.getProducts({ isFastMoving: true, size: 8 })}
+            bg="background"
+          />
           <CategoryGrid />
           <AudiencesWeServe />
           <LatestBlogsStrip />
         </main>
         <SiteFooter />
         <WhatsAppFloat />
-        <MobileFab />
         <EmailInsiderPrompt />
+        <BottomNav />
       </div>
     </>
   );

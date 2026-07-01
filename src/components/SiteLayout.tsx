@@ -5,7 +5,7 @@ import { WhatsAppFloat } from "./WhatsAppFloat";
 import { PageProgressBar } from "./PageProgressBar";
 import { EmailInsiderPrompt } from "./EmailInsiderPrompt";
 import { AppSplash } from "./AppSplash";
-import { MobileFab } from "./MobileFab";
+import { BottomNav } from "./BottomNav";
 import { CookieConsent } from "./CookieConsent";
 
 const SPLASH_KEY = "moments_splash_shown";
@@ -31,12 +31,12 @@ function LayoutShell({ children }: { children: ReactNode }) {
       <PageProgressBar />
       <div className="flex min-h-screen flex-col bg-background">
         <SiteHeader />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 pb-16 md:pb-0">{children}</main>
         <SiteFooter />
         <WhatsAppFloat />
-        <MobileFab />
         <EmailInsiderPrompt />
         <CookieConsent />
+        <BottomNav />
       </div>
     </>
   );

@@ -11,7 +11,7 @@ export function WhatsAppFloat() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with us on WhatsApp"
-      className="fixed bottom-4 left-4 z-50 flex min-h-[48px] items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:scale-105 hover:shadow-xl sm:bottom-6 sm:left-6 sm:px-5 sm:py-3.5"
+      className="fixed bottom-4 left-4 z-50 hidden min-h-[48px] items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:scale-105 hover:shadow-xl sm:bottom-6 sm:left-6 sm:px-5 sm:py-3.5 md:flex"
     >
       <svg viewBox="0 0 32 32" className="h-5 w-5 fill-current" aria-hidden="true">
         <path d="M16.003 3C9.374 3 4 8.373 4 14.999c0 2.317.65 4.487 1.776 6.345L4 29l7.86-1.747a11.95 11.95 0 0 0 4.143.74h.005C22.633 27.993 28 22.62 28 15.994 28 8.373 22.625 3 16.003 3zm0 21.78h-.004a9.81 9.81 0 0 1-3.998-.873l-.286-.13-4.665 1.038 1.06-4.55-.187-.296a9.79 9.79 0 0 1-1.503-5.18c0-5.41 4.404-9.812 9.819-9.812 2.622 0 5.085 1.022 6.937 2.875a9.74 9.74 0 0 1 2.873 6.943c-.003 5.41-4.408 9.811-9.823 9.811z" />
