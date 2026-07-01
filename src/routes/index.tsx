@@ -664,12 +664,12 @@ function ProductRow({ eyebrow, title, seeAllHref = "/products", fetcher, bg = "b
         <div className="mt-6 -mx-5 flex gap-3 overflow-x-auto px-5 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-5 sm:overflow-visible sm:px-0 md:grid-cols-4 lg:gap-6">
           {products === null
             ? Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="w-[45vw] shrink-0 sm:w-auto">
+                <div key={i} className="grid w-[45vw] shrink-0 sm:w-auto">
                   <ProductCardSkeleton />
                 </div>
               ))
             : products.map((p) => (
-                <div key={p.id} className="w-[45vw] shrink-0 sm:w-auto">
+                <div key={p.id} className="grid w-[45vw] shrink-0 sm:w-auto">
                   <ProductCard product={p} onConfigure={handleConfigure} />
                 </div>
               ))}

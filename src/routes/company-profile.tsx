@@ -33,7 +33,7 @@ import woodenImg from "@/assets/company-profile/wooden-products.jpg";
 import dessertImg from "@/assets/company-profile/dessert-cups.jpg";
 import bagsImg from "@/assets/company-profile/bags-sacks.jpg";
 import esgPoster1 from "@/assets/company-profile/esg-poster-1.jpg.asset.json";
-import introImg from "@/assets/company-profile/intro.jpg";
+import introImg from "@/assets/company-profile/intro.jpg.asset.json";
 import {
   COMPANY_EMAIL,
   COMPANY_PHONE,
@@ -457,7 +457,7 @@ function CompanyProfilePage() {
                 style={{ background: `linear-gradient(135deg, ${GOLD} 0%, transparent 60%)` }}
               />
               <img
-                src={introImg}
+                src={introImg.url}
                 alt="Why choose Moments Packaging"
                 className="relative w-full rounded-2xl shadow-2xl"
               />
