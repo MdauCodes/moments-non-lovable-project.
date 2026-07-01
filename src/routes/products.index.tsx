@@ -113,7 +113,7 @@ const searchSchema = z.object({
 
 const PAGE_SIZE = 20;
 // The backend `category` field is free text with an exact case-insensitive match filter,
-// normalized server-side (ProductCategoryNormalizationSeeder) to these 15 canonical values.
+// normalized server-side (ProductCategoryNormalizationSeeder) to these canonical values.
 // `value` must match the canonical DB string exactly — this is intentionally decoupled from
 // the homepage's decorative `categories` list (data/products.ts), which only covers 6
 // curated, image-backed groupings for visual browsing, not the full real taxonomy.
@@ -133,6 +133,8 @@ const CATEGORY_OPTIONS = [
   { value: "General", label: "General" },
   { value: "Miscellaneous", label: "Miscellaneous" },
   { value: "Boards", label: "Boards" },
+  { value: "Gifting & Retail", label: "Gifting & Retail" },
+  { value: "Mailers & Shipping", label: "Mailers & Shipping" },
 ];
 const ALL_PRICE_MAX = 500;
 
