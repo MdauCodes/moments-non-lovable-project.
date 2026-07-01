@@ -25,14 +25,12 @@ const INDUSTRY_QUICK_FINDS: Record<string, Array<{ label: string; search: string
     { label: "Wrapping food",               search: "cling film" },
   ],
   "retail-and-ecommerce": [
-    { label: "Customer carry bags",         search: "shopping bag" },
+    { label: "Customer carry bags",         search: "twisted handle" },
     { label: "POS receipt paper",           search: "thermal roll" },
     { label: "Fresh produce display",       search: "punnet" },
     { label: "Cold drinks & juice",         search: "cold cup" },
-    { label: "Mailers & courier packaging", search: "mailer" },
   ],
   "health-and-beauty": [
-    { label: "Dispensing & pharmacy bags",  search: "pharmacy bag" },
     { label: "Gloves & hand protection",    search: "gloves" },
     { label: "Face masks & safety",         search: "face mask" },
     { label: "Cosmetics & skincare jars",   search: "jar" },
@@ -49,16 +47,13 @@ const INDUSTRY_QUICK_FINDS: Record<string, Array<{ label: string; search: string
   "manufacturing": [
     { label: "Sealing & securing goods",    search: "tape" },
     { label: "Worker safety & PPE",         search: "gloves" },
-    { label: "Bulk storage & transport",    search: "woven sack" },
     { label: "Pallet & stretch wrapping",   search: "stretch wrap" },
     { label: "Foil & barrier lining",       search: "aluminium foil" },
   ],
   "hospitality": [
     { label: "Serving food (plates & cutlery)", search: "plates" },
     { label: "Hot & cold cups",             search: "cups" },
-    { label: "Event & banquet catering",    search: "foil tray" },
     { label: "Takeaway & room service",     search: "takeaway" },
-    { label: "Napkins & table linen",       search: "napkin" },
     { label: "Waste & housekeeping",        search: "garbage bag" },
   ],
   "fashion-and-apparel": [
@@ -67,7 +62,7 @@ const INDUSTRY_QUICK_FINDS: Record<string, Array<{ label: string; search: string
     { label: "Premium gift packaging",      search: "millinary" },
   ],
   "electronics": [
-    { label: "Protective wrapping",         search: "bubble" },
+    { label: "Protective wrapping",         search: "stretch wrap" },
     { label: "Sealing boxes & cartons",     search: "tape" },
   ],
 };
