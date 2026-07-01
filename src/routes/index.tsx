@@ -29,7 +29,7 @@ import { api } from "@/services/api";
 import type { Product } from "@/data/products";
 import cloudV3 from "@/assets/packaging-cloud-hero-v3.png";
 import cloudKraft from "@/assets/packaging-cloud-hero.png";
-import ecoCluster from "@/assets/company-profile/eco-packaging-cluster.png.asset.json";
+import ecoCluster from "@/assets/company-profile/eco-packaging-cluster.png";
 import logoUrl from "@/assets/moments-logo.png";
 
 const SPLASH_KEY = "moments_splash_shown";
@@ -193,7 +193,7 @@ function Hero() {
           }}
         />
         <img
-          src={ecoCluster.url}
+          src={ecoCluster}
           alt="Eco-friendly food packaging — kraft bags, containers, cups and bagasse plates"
           className="mpk-hero-img-c absolute pointer-events-none select-none"
           style={{

@@ -25,15 +25,15 @@ import {
   CookingPot,
 } from "lucide-react";
 import { SiteLayout } from "@/components/SiteLayout";
-import pdfAsset from "@/assets/moments-company-profile.pdf.asset.json";
-import coverImg from "@/assets/company-profile/cover.jpg.asset.json";
+import pdfAsset from "@/assets/company-profile/moments-company-profile.pdf";
+import coverImg from "@/assets/company-profile/cover.jpg";
 import visionImg from "@/assets/company-profile/vision-cups.jpg";
 import cupsBeverageImg from "@/assets/company-profile/cups-beverage.jpg";
 import woodenImg from "@/assets/company-profile/wooden-products.jpg";
 import dessertImg from "@/assets/company-profile/dessert-cups.jpg";
 import bagsImg from "@/assets/company-profile/bags-sacks.jpg";
-import esgPoster1 from "@/assets/company-profile/esg-poster-1.jpg.asset.json";
-import introImg from "@/assets/company-profile/intro.jpg.asset.json";
+import esgPoster1 from "@/assets/company-profile/esg-poster-1.jpg";
+import introImg from "@/assets/company-profile/intro.jpg";
 import {
   COMPANY_EMAIL,
   COMPANY_PHONE,
@@ -174,7 +174,7 @@ function CompanyProfilePage() {
         <div
           className="absolute inset-0 lg:hidden"
           style={{
-            backgroundImage: `url(${coverImg.url})`,
+            backgroundImage: `url(${coverImg})`,
             backgroundSize: "cover",
             backgroundPosition: "center right",
             backgroundRepeat: "no-repeat",
@@ -221,7 +221,7 @@ function CompanyProfilePage() {
                 Browse our products <ArrowRight className="h-4 w-4" />
               </Link>
               <a
-                href={pdfAsset.url}
+                href={pdfAsset}
                 download="Moments-Packaging-Company-Profile.pdf"
                 className="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm font-medium text-white backdrop-blur transition-colors hover:bg-white/10"
                 style={{ borderColor: `${GOLD}66` }}
@@ -258,7 +258,7 @@ function CompanyProfilePage() {
               style={{ background: `linear-gradient(135deg, ${GOLD} 0%, transparent 65%)` }}
             />
             <img
-              src={coverImg.url}
+              src={coverImg}
               alt="Moments Packaging product range"
               className="relative w-full rounded-3xl border shadow-2xl object-cover"
               style={{ borderColor: `${GOLD}40`, maxHeight: "520px" }}
@@ -318,7 +318,7 @@ function CompanyProfilePage() {
       <section className="relative" style={{ background: FOREST }}>
         <div className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-20">
           <div className="grid gap-6 lg:grid-cols-2 lg:items-center lg:gap-12">
-            <img src={coverImg.url} alt="Vision — Moments packaging range" className="w-full rounded-2xl shadow-2xl" />
+            <img src={coverImg} alt="Vision — Moments packaging range" className="w-full rounded-2xl shadow-2xl" />
             <div className="grid gap-5">
               {[
                 {
@@ -457,7 +457,7 @@ function CompanyProfilePage() {
                 style={{ background: `linear-gradient(135deg, ${GOLD} 0%, transparent 60%)` }}
               />
               <img
-                src={introImg.url}
+                src={introImg}
                 alt="Why choose Moments Packaging"
                 className="relative w-full rounded-2xl shadow-2xl"
               />
@@ -612,7 +612,7 @@ function CompanyProfilePage() {
               Our ESG &amp; Sustainability Policy
             </p>
             <a
-              href={esgPoster1.url}
+              href={esgPoster1}
               target="_blank"
               rel="noopener noreferrer"
               className="mx-auto mt-5 block max-w-md overflow-hidden rounded-2xl border bg-white/5 transition-transform hover:-translate-y-1"
@@ -620,7 +620,7 @@ function CompanyProfilePage() {
               aria-label="Open ESG &amp; Sustainability Policy poster in a new tab"
             >
               <img
-                src={esgPoster1.url}
+                src={esgPoster1}
                 alt="Moments Packaging — ESG &amp; Sustainability Policy poster"
                 className="block h-full w-full object-cover"
                 loading="lazy"
@@ -703,7 +703,7 @@ function CompanyProfilePage() {
                 Request a quote <ArrowRight className="h-4 w-4" />
               </Link>
               <a
-                href={pdfAsset.url}
+                href={pdfAsset}
                 download="Moments-Packaging-Company-Profile.pdf"
                 className="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm font-medium text-white hover:bg-white/5"
                 style={{ borderColor: `${GOLD}80` }}
