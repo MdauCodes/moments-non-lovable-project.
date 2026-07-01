@@ -27,13 +27,13 @@ import {
 import { SiteLayout } from "@/components/SiteLayout";
 import pdfAsset from "@/assets/moments-company-profile.pdf.asset.json";
 import coverImg from "@/assets/company-profile/cover.jpg.asset.json";
-import visionImg from "@/assets/company-profile/vision-cups.jpg.asset.json";
+import visionImg from "@/assets/company-profile/vision-cups.jpg";
 import cupsBeverageImg from "@/assets/company-profile/cups-beverage.jpg";
-import woodenImg from "@/assets/company-profile/wooden-products.jpg.asset.json";
-import dessertImg from "@/assets/company-profile/dessert-cups.jpg.asset.json";
-import bagsImg from "@/assets/company-profile/bags-sacks.jpg.asset.json";
+import woodenImg from "@/assets/company-profile/wooden-products.jpg";
+import dessertImg from "@/assets/company-profile/dessert-cups.jpg";
+import bagsImg from "@/assets/company-profile/bags-sacks.jpg";
 import esgPoster1 from "@/assets/company-profile/esg-poster-1.jpg.asset.json";
-import introImg from "@/assets/company-profile/intro.jpg.asset.json";
+import introImg from "@/assets/company-profile/intro.jpg";
 import {
   COMPANY_EMAIL,
   COMPANY_PHONE,
@@ -81,7 +81,7 @@ const CORE = [
     title: "Kraft Packaging Solutions",
     blurb:
       "Sustainable, durable, eco-friendly kraft food packaging — boats, sandwich boxes, carry bags, lunch boxes, window pouches, food containers, paper cups and trays.",
-    image: visionImg.url, // vision-cups.jpg = Kraft poster grid
+    image: visionImg, // vision-cups.jpg = Kraft poster grid
     href: "/products" as const,
     search: { category: "boxes" } as Record<string, string>,
   },
@@ -97,7 +97,7 @@ const CORE = [
     title: "Dessert Cups & Display Glassware",
     blurb:
       "Trapeze, sundae, flower, oval, square, twisted, eye-lid, slanted and shooter cups for cafés, bakeries and caterers.",
-    image: dessertImg.url,
+    image: dessertImg,
     href: "/products" as const,
     search: { category: "cups" } as Record<string, string>,
   },
@@ -105,7 +105,7 @@ const CORE = [
     title: "Wooden & Bamboo Disposables",
     blurb:
       "Wooden cones, cutlery, teaspoons, skewers, stirrers, chopsticks, ice-cream sticks, cocktail picks and bamboo accessories.",
-    image: woodenImg.url,
+    image: woodenImg,
     href: "/products" as const,
     search: {} as Record<string, string>,
   },
@@ -113,7 +113,7 @@ const CORE = [
     title: "Bags & Sacks",
     blurb:
       "Woven and non-woven branded bags — V-series handle sacks, smart bags, 3D bags, vest bags, D-cut bags and bulk sacks.",
-    image: bagsImg.url,
+    image: bagsImg,
     href: "/products" as const,
     search: { category: "bags" } as Record<string, string>,
   },
@@ -457,7 +457,7 @@ function CompanyProfilePage() {
                 style={{ background: `linear-gradient(135deg, ${GOLD} 0%, transparent 60%)` }}
               />
               <img
-                src={introImg.url}
+                src={introImg}
                 alt="Why choose Moments Packaging"
                 className="relative w-full rounded-2xl shadow-2xl"
               />

@@ -19,7 +19,6 @@ const INDUSTRY_QUICK_FINDS: Record<string, Array<{ label: string; search: string
     { label: "Serving hot drinks",          search: "hot cup" },
     { label: "Cold drinks & juice bar",     search: "cold cup" },
     { label: "Takeaway & delivery orders",  search: "takeaway box" },
-    { label: "Baked goods & pastry",        search: "cake" },
     { label: "POS & billing receipts",      search: "thermal roll" },
     { label: "Cutlery & plates",            search: "cutlery" },
     { label: "Straws & stirrers",           search: "straw" },
