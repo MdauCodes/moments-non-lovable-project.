@@ -1,6 +1,7 @@
 
 import { COMPANY_EMAIL, COMPANY_PHONE } from "@/data/products";
 import { LegalPageLayout, type LegalSection } from "@/components/LegalPageLayout";
+import { SiteLayout } from "@/components/SiteLayout";
 
 
 
@@ -207,23 +208,25 @@ function RefundsPage() {
   ];
 
   return (
-    <LegalPageLayout
-      title="Refund & Returns Policy"
-      updated="May 19, 2026"
-      intro={
-        <>
-          Most of what we make is custom-printed for your brand, so refunds and returns work a
-          little differently than at a standard retail shop. Here&apos;s when a refund applies,
-          how to request one, and what to expect.
-        </>
-      }
-      sections={sections}
-      related={[
-        { to: "/", label: "Home" },
-        { to: "/terms", label: "Terms of Service" },
-        { to: "/privacy", label: "Privacy Policy" },
-      ]}
-    />
+    <SiteLayout>
+      <LegalPageLayout
+        title="Refund & Returns Policy"
+        updated="May 19, 2026"
+        intro={
+          <>
+            Most of what we make is custom-printed for your brand, so refunds and returns work a
+            little differently than at a standard retail shop. Here&apos;s when a refund applies,
+            how to request one, and what to expect.
+          </>
+        }
+        sections={sections}
+        related={[
+          { to: "/", label: "Home" },
+          { to: "/terms", label: "Terms of Service" },
+          { to: "/privacy", label: "Privacy Policy" },
+        ]}
+      />
+    </SiteLayout>
   );
 }
 

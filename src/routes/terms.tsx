@@ -1,6 +1,7 @@
 
 import { COMPANY_EMAIL, COMPANY_PHONE } from "@/data/products";
 import { LegalPageLayout, type LegalSection } from "@/components/LegalPageLayout";
+import { SiteLayout } from "@/components/SiteLayout";
 
 
 
@@ -232,23 +233,25 @@ function TermsPage() {
   ];
 
   return (
-    <LegalPageLayout
-      title="Terms of Service"
-      updated="May 19, 2026"
-      intro={
-        <>
-          The terms that govern quotes, orders, payment, production, delivery and returns when
-          you buy custom-branded paper packaging from Moments Packaging Kenya. By placing an
-          order or using the site, you agree to these Terms.
-        </>
-      }
-      sections={sections}
-      related={[
-        { to: "/", label: "Home" },
-        { to: "/privacy", label: "Privacy Policy" },
-        { to: "/refunds", label: "Refund & Returns Policy" },
-      ]}
-    />
+    <SiteLayout>
+      <LegalPageLayout
+        title="Terms of Service"
+        updated="May 19, 2026"
+        intro={
+          <>
+            The terms that govern quotes, orders, payment, production, delivery and returns when
+            you buy custom-branded paper packaging from Moments Packaging Kenya. By placing an
+            order or using the site, you agree to these Terms.
+          </>
+        }
+        sections={sections}
+        related={[
+          { to: "/", label: "Home" },
+          { to: "/privacy", label: "Privacy Policy" },
+          { to: "/refunds", label: "Refund & Returns Policy" },
+        ]}
+      />
+    </SiteLayout>
   );
 }
 

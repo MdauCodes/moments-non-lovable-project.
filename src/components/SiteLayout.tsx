@@ -7,6 +7,7 @@ import { EmailInsiderPrompt } from "./EmailInsiderPrompt";
 import { AppSplash } from "./AppSplash";
 import { BottomNav } from "./BottomNav";
 import { CookieConsent } from "./CookieConsent";
+import { AddToHomeScreenPrompt } from "./AddToHomeScreenPrompt";
 
 const SPLASH_KEY = "moments_splash_shown";
 
@@ -30,6 +31,7 @@ function LayoutShell({ children }: { children: ReactNode }) {
       <FirstVisitSplash />
       <PageProgressBar />
       <div className="flex min-h-screen flex-col bg-background">
+        <AddToHomeScreenPrompt />
         <SiteHeader />
         <main className="flex-1 pb-16 md:pb-0">{children}</main>
         <SiteFooter />

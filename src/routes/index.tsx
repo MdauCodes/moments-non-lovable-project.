@@ -7,6 +7,9 @@ import { PageProgressBar } from "@/components/PageProgressBar";
 import { EmailInsiderPrompt } from "@/components/EmailInsiderPrompt";
 import { AppSplash } from "@/components/AppSplash";
 import { BottomNav } from "@/components/BottomNav";
+import { AddToHomeScreenPrompt } from "@/components/AddToHomeScreenPrompt";
+import { GuaranteeBand } from "@/components/GuaranteeBand";
+import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { LatestBlogsStrip } from "@/components/blog/LatestBlogsStrip";
 import { ProductCardSkeleton } from "@/components/ProductCardSkeleton";
 import { ProductCard } from "@/components/ProductCard";
@@ -801,9 +804,11 @@ function HomePage() {
       <FirstVisitSplash />
       <PageProgressBar />
       <div className="flex min-h-screen flex-col" style={{ background: "var(--background)" }}>
+        <AddToHomeScreenPrompt />
         <main className="flex-1 pb-16 md:pb-0">
           <Hero />
           <CategoryRow />
+          <GuaranteeBand />
           <ProductRow
             eyebrow="Featured products"
             title="Popular this week"
@@ -825,6 +830,7 @@ function HomePage() {
             bg="background"
           />
           <CategoryGrid />
+          <TestimonialsSection />
           <AudiencesWeServe />
           <LatestBlogsStrip />
         </main>

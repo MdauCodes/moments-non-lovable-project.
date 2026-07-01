@@ -68,7 +68,7 @@ export function LegalPageLayout({
   }, [sections]);
 
   return (
-    <main className="bg-background">
+    <div className="bg-background">
       {/* Hero band */}
       <section className="relative overflow-hidden border-b border-border bg-primary text-primary-foreground">
         <div
@@ -222,6 +222,6 @@ export function LegalPageLayout({
           <ArrowUp className="h-4 w-4" aria-hidden />
         </button>
       )}
-    </main>
+    </div>
   );
 }

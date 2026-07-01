@@ -32,6 +32,11 @@ import StaffPage from "@/routes/staff";
 import StyleGuidePage from "@/routes/style-guide";
 import BlogIndexPage from "@/routes/blog.index";
 import BlogSlugPage from "@/routes/blog.$slug";
+import FaqPage from "@/routes/faq";
+import HowItWorksPage from "@/routes/how-it-works";
+import PaymentMethodsPage from "@/routes/payment-methods";
+import CareersPage from "@/routes/careers";
+import BecomeAPartnerPage from "@/routes/become-a-partner";
 import ProductsIndexPage from "@/routes/products.index";
 import ProductSlugPage from "@/routes/products.$slug";
 
@@ -116,6 +121,11 @@ export default function App() {
                     <Route path="/style-guide" element={<StyleGuidePage />} />
                     <Route path="/blog" element={<BlogIndexPage />} />
                     <Route path="/blog/:slug" element={<BlogSlugPage />} />
+                    <Route path="/faq" element={<FaqPage />} />
+                    <Route path="/how-it-works" element={<HowItWorksPage />} />
+                    <Route path="/payment-methods" element={<PaymentMethodsPage />} />
+                    <Route path="/careers" element={<CareersPage />} />
+                    <Route path="/become-a-partner" element={<BecomeAPartnerPage />} />
                     <Route path="/products" element={<ProductsIndexPage />} />
                     <Route path="/products/:slug" element={<ProductSlugPage />} />
 

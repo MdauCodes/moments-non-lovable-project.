@@ -1,7 +1,7 @@
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 
 import { useState, useRef, useEffect } from "react";
-import { Menu, X, ChevronDown, Search, ShoppingBag, User } from "lucide-react";
+import { Menu, X, ChevronDown, Search, ShoppingBag, User, HelpCircle } from "lucide-react";
 import logoUrl from "@/assets/moments-logo.png";
 import { categories } from "@/data/products";
 import { SearchCommand } from "@/components/SearchCommand";
@@ -184,6 +184,13 @@ export function SiteHeader() {
 
             <div className="ml-2 flex items-center gap-1">
               <Link
+                to="/faq"
+                aria-label="Help"
+                className="grid h-10 w-10 place-items-center rounded-full text-foreground/80 transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <HelpCircle className="h-5 w-5" />
+              </Link>
+              <Link
                 to="/cart"
                 aria-label="Cart"
                 className="relative grid h-10 w-10 place-items-center rounded-full text-foreground/80 transition-colors hover:bg-secondary hover:text-foreground"
@@ -355,6 +362,13 @@ export function SiteHeader() {
                   {n.label}
                 </Link>
               ))}
+              <Link
+                to="/faq"
+                onClick={() => setOpen(false)}
+                className="rounded-md px-3 py-3 text-sm font-medium text-foreground/80 hover:bg-secondary"
+              >
+                Help / FAQ
+              </Link>
 
               {isAuthenticated ? (
                 <div className="mt-2 border-t border-border pt-2">

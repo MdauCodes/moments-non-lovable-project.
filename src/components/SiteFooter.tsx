@@ -31,7 +31,7 @@ export function SiteFooter() {
         background: "radial-gradient(ellipse at 100% 0%, #0d3320 0%, #08231a 60%, #061a13 100%)",
       }}
     >
-      <div className="mx-auto grid gap-8 px-5 py-12 sm:gap-10 sm:py-16 md:grid-cols-4 max-w-7xl lg:px-8">
+      <div className="mx-auto grid gap-8 px-5 py-12 sm:grid-cols-2 sm:gap-10 sm:py-16 md:grid-cols-3 lg:grid-cols-5 max-w-7xl lg:px-8">
         {/* Brand col */}
         <div>
           <div className="flex items-center gap-2">
@@ -102,6 +102,38 @@ export function SiteFooter() {
             <li>
               <Link to="/enterprise-quote" className="hover:text-accent">
                 Enterprise Quote
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Support col */}
+        <div>
+          <h4 className="font-display text-sm uppercase tracking-widest text-primary-foreground/60">Support</h4>
+          <ul className="mt-4 space-y-2 text-sm">
+            <li>
+              <Link to="/faq" className="hover:text-accent">
+                FAQ
+              </Link>
+            </li>
+            <li>
+              <Link to="/how-it-works" className="hover:text-accent">
+                How it works
+              </Link>
+            </li>
+            <li>
+              <Link to="/payment-methods" className="hover:text-accent">
+                Payment methods
+              </Link>
+            </li>
+            <li>
+              <Link to="/careers" className="hover:text-accent">
+                Careers
+              </Link>
+            </li>
+            <li>
+              <Link to="/become-a-partner" className="hover:text-accent">
+                Become a partner
               </Link>
             </li>
           </ul>

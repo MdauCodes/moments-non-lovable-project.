@@ -1,6 +1,7 @@
 
 import { COMPANY_EMAIL, COMPANY_PHONE } from "@/data/products";
 import { LegalPageLayout, type LegalSection } from "@/components/LegalPageLayout";
+import { SiteLayout } from "@/components/SiteLayout";
 
 
 
@@ -337,23 +338,25 @@ function PrivacyPage() {
   ];
 
   return (
-    <LegalPageLayout
-      title="Privacy Policy"
-      updated="May 19, 2026"
-      intro={
-        <>
-          How Moments Packaging Kenya collects, uses, shares and protects your personal data when
-          you visit our site, request a quote, place an order, or message us — in line with the{" "}
-          <strong>Kenya Data Protection Act, 2019</strong>.
-        </>
-      }
-      sections={sections}
-      related={[
-        { to: "/", label: "Home" },
-        { to: "/terms", label: "Terms of Service" },
-        { to: "/refunds", label: "Refund & Returns Policy" },
-      ]}
-    />
+    <SiteLayout>
+      <LegalPageLayout
+        title="Privacy Policy"
+        updated="May 19, 2026"
+        intro={
+          <>
+            How Moments Packaging Kenya collects, uses, shares and protects your personal data when
+            you visit our site, request a quote, place an order, or message us — in line with the{" "}
+            <strong>Kenya Data Protection Act, 2019</strong>.
+          </>
+        }
+        sections={sections}
+        related={[
+          { to: "/", label: "Home" },
+          { to: "/terms", label: "Terms of Service" },
+          { to: "/refunds", label: "Refund & Returns Policy" },
+        ]}
+      />
+    </SiteLayout>
   );
 }
 
