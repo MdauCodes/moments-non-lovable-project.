@@ -1,12 +1,13 @@
 import { Link, useSearchParams } from "react-router-dom";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Search, X } from "lucide-react";
+import { Check, Search, X } from "lucide-react";
 import { z } from "zod";
 import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCardSkeleton } from "@/components/ProductCardSkeleton";
 import { ProductCard } from "@/components/ProductCard";
 import { ConfiguratorModal } from "@/components/ConfiguratorModal";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 import { api } from "@/services/api";
 import { WHATSAPP_NUMBER, filterVisibleIndustries } from "@/data/products";
@@ -192,6 +193,25 @@ function ProductsPage() {
   const [searchResults, setSearchResults] = useState<Product[] | null>(null);
   const [query, setQuery] = useState(q ?? "");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [quickFindOpen, setQuickFindOpen] = useState(false);
+  const [selectedQuickFinds, setSelectedQuickFinds] = useState<string[]>([]);
+
+  const toggleQuickFind = (term: string) => {
+    setSelectedQuickFinds((prev) =>
+      prev.includes(term) ? prev.filter((t) => t !== term) : [...prev, term],
+    );
+  };
+
+  const applyQuickFinds = () => {
+    setQuery(selectedQuickFinds.join(" "));
+    setQuickFindOpen(false);
+    // Results are async (debounced search + fetch) — retry the scroll a few
+    // times so it lands correctly once the grid has actually rendered,
+    // same fix as the company-profile hash-scroll (layout shifts as content
+    // loads in, so a single scroll attempt can land in the wrong place).
+    const scroll = () => document.getElementById("results-anchor")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    [100, 500, 1000].forEach((ms) => window.setTimeout(scroll, ms));
+  };
   const [configuring, setConfiguring] = useState<Product | null>(null);
   const [preTier, setPreTier] = useState<string | null>(null);
   const handleConfigure = (p: Product, tierId?: string) => {
@@ -449,29 +469,21 @@ function ProductsPage() {
           </div>
         </div>
 
-        {/* Quick find — always visible, works whether the customer knows the
-            product name or just has a rough idea of what they need. */}
-        <div className="mt-5">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Not sure what it&apos;s called? Tap what you need
-          </p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {GLOBAL_QUICK_FINDS.map((item) => (
-              <button
-                key={item.search}
-                type="button"
-                onClick={() => { setQuery(item.search); setSearchResults(null); }}
-                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                  query === item.search
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-foreground/20 bg-cream text-foreground hover:border-primary/40 hover:bg-primary/5"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Quick find trigger — opens a modal so the customer can pick several
+            needs at once, then jumps straight to matching products instead of
+            scrolling past rows of chips first. */}
+        <button
+          type="button"
+          onClick={() => setQuickFindOpen(true)}
+          className="mt-5 flex w-full items-center justify-between rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/10"
+        >
+          <span className="text-sm font-medium text-foreground">
+            {selectedQuickFinds.length > 0
+              ? `${selectedQuickFinds.length} quick find${selectedQuickFinds.length === 1 ? "" : "s"} selected`
+              : "Not sure what it's called? Tap what you need"}
+          </span>
+          <span className="text-xs font-semibold text-primary">Browse →</span>
+        </button>
 
         {/* Status toggles */}
         <div className="scrollbar-hide mt-3 flex items-center gap-2 overflow-x-auto pb-3">
@@ -645,6 +657,7 @@ function ProductsPage() {
         )}
 
         {/* Grid */}
+        <div id="results-anchor" className="scroll-mt-20" />
         {isLoading ? (
           <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -754,6 +767,60 @@ function ProductsPage() {
       </section>
 
       <ConfiguratorModal product={configuring} preSelectedTierId={preTier} onClose={() => setConfiguring(null)} />
+
+      <Sheet open={quickFindOpen} onOpenChange={setQuickFindOpen}>
+        <SheetContent
+          side="bottom"
+          className="max-h-[85vh] overflow-y-auto rounded-t-2xl bg-background p-0 sm:mx-auto sm:max-w-2xl"
+        >
+          <div className="sticky top-0 z-10 border-b border-border bg-background px-5 py-4">
+            <h2 className="font-display text-lg text-foreground">What do you need?</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Tap as many as apply — we&apos;ll show everything that matches.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 px-5 py-5">
+            {GLOBAL_QUICK_FINDS.map((item) => {
+              const active = selectedQuickFinds.includes(item.search);
+              return (
+                <button
+                  key={item.search}
+                  type="button"
+                  onClick={() => toggleQuickFind(item.search)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors ${
+                    active
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-foreground/20 bg-cream text-foreground hover:border-primary/40 hover:bg-primary/5"
+                  }`}
+                >
+                  {active && <Check className="h-3.5 w-3.5" />}
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t border-border bg-background px-5 py-4">
+            <button
+              type="button"
+              onClick={() => setSelectedQuickFinds([])}
+              disabled={selectedQuickFinds.length === 0}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-40"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              onClick={applyQuickFinds}
+              disabled={selectedQuickFinds.length === 0}
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40 sm:flex-none"
+            >
+              {selectedQuickFinds.length === 0
+                ? "Select at least one"
+                : `Show products (${selectedQuickFinds.length} selected)`}
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </SiteLayout>
   );
 }
