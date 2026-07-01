@@ -9,7 +9,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { ConfiguratorModal } from "@/components/ConfiguratorModal";
 
 import { api } from "@/services/api";
-import { WHATSAPP_NUMBER } from "@/data/products";
+import { WHATSAPP_NUMBER, filterVisibleIndustries } from "@/data/products";
 
 // Customer-intent chips shown when an industry is selected.
 // label = plain English the customer thinks in.
@@ -210,7 +210,7 @@ function ProductsPage() {
   useEffect(() => {
     let cancelled = false;
     void api.getIndustries().then((data) => {
-      if (!cancelled) setIndustries(data);
+      if (!cancelled) setIndustries(filterVisibleIndustries(data));
     });
     return () => { cancelled = true; };
   }, []);
@@ -564,42 +564,6 @@ function ProductsPage() {
                 </div>
               </div>
             )}
-          </div>
-        )}
-
-        {/* Browse by business type — shown when no filter active and data is loaded */}
-        {!anyFilterActive && !isLoading && !searchResults && industries.length > 0 && (
-          <div className="mt-8">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              What does your business do?
-            </p>
-            <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-              {industries.map((ind) => {
-                const Icon = ind.icon;
-                return (
-                  <button
-                    key={ind.id}
-                    type="button"
-                    onClick={() => toggleIndustry(ind.slug)}
-                    className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm"
-                  >
-                    {Icon && (
-                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/15">
-                        <Icon className="h-4 w-4" />
-                      </span>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground">{ind.name}</p>
-                      {ind.description && (
-                        <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                          {ind.description}
-                        </p>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
           </div>
         )}
 

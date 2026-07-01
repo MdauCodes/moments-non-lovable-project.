@@ -53,6 +53,15 @@ export const TIKTOK_HANDLE = "moments Packaging";
 export const FACEBOOK_URL = "https://facebook.com/momentspackaging";
 export const FACEBOOK_HANDLE = "moments Packaging";
 
+// Industries hidden from customer-facing browsing UI (frontend-only — the
+// backend record and any tagged products are untouched). To bring an
+// industry back, just remove its slug from this list.
+export const HIDDEN_INDUSTRY_SLUGS: readonly string[] = ["electronics"];
+
+export function filterVisibleIndustries<T extends { slug: string }>(list: T[]): T[] {
+  return list.filter((i) => !HIDDEN_INDUSTRY_SLUGS.includes(i.slug));
+}
+
 export type ProductTag = "Trending" | "New" | "Discounted" | "Featured";
 
 export interface Industry {
@@ -77,7 +86,7 @@ export interface Industry {
  * Backend mapping: `industries` table (id/name/slug/description) +
  * `industry_keywords` text[] for search recall. See backendSpec.md §3.3.
  */
-export const industries: Industry[] = [
+const ALL_INDUSTRIES: Industry[] = [
   {
     id: "1",
     name: "Food & Beverage",
@@ -159,6 +168,8 @@ export const industries: Industry[] = [
     image: indIndustrialImg,
   },
 ];
+
+export const industries: Industry[] = filterVisibleIndustries(ALL_INDUSTRIES);
 
 export type Product = {
   id: string;

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/services/api";
 import { apiFetch } from "@/config/api";
-import type { Industry } from "@/data/products";
+import { filterVisibleIndustries, type Industry } from "@/data/products";
 import { useSiteConfig } from "@/contexts/SiteConfigContext";
 import { CheckCircle2 } from "lucide-react";
 import { ConsentCheckbox } from "@/components/ConsentCheckbox";
@@ -58,7 +58,7 @@ function EnterpriseQuotePage() {
 
   useEffect(() => {
     document.title = "Enterprise Quote — Moments Packaging Kenya";
-    api.getIndustries().then(setIndustries).catch(() => setIndustries([]));
+    api.getIndustries().then((data) => setIndustries(filterVisibleIndustries(data))).catch(() => setIndustries([]));
   }, []);
 
   const update = (k: keyof typeof form, v: string) => {
