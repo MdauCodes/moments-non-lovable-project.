@@ -66,6 +66,38 @@ const INDUSTRY_QUICK_FINDS: Record<string, Array<{ label: string; search: string
     { label: "Sealing boxes & cartons",     search: "tape" },
   ],
 };
+
+// Always-visible, industry-agnostic quick-find chips — for a customer who
+// doesn't know (or doesn't care) which "industry" they fall under, just what
+// they need. Every term here is verified against real product names in the
+// catalogue (same audit that removed "cake", "bubble", "mailer" etc. for
+// returning wrong/no results — see INDUSTRY_QUICK_FINDS above for the
+// per-industry originals this list is deduplicated from).
+const GLOBAL_QUICK_FINDS: Array<{ label: string; search: string }> = [
+  { label: "Hot drinks & coffee",        search: "hot cup" },
+  { label: "Cold drinks & juice",        search: "cold cup" },
+  { label: "Takeaway & delivery",        search: "takeaway box" },
+  { label: "POS & receipt rolls",        search: "thermal roll" },
+  { label: "Cutlery",                    search: "cutlery" },
+  { label: "Straws & stirrers",          search: "straw" },
+  { label: "Cling film & wrapping",      search: "cling film" },
+  { label: "Shopping & boutique bags",   search: "twisted handle" },
+  { label: "Fresh produce packs",        search: "punnet" },
+  { label: "Gloves",                     search: "gloves" },
+  { label: "Face masks",                 search: "face mask" },
+  { label: "Jars & containers",          search: "jar" },
+  { label: "Reusable tote bags",         search: "non-woven" },
+  { label: "Hairnets",                   search: "hairnet" },
+  { label: "Grain & bulk sacks",         search: "panel sack" },
+  { label: "Produce net bags",           search: "net bag" },
+  { label: "Honey jars",                 search: "honey jar" },
+  { label: "Tapes & sealing",            search: "tape" },
+  { label: "Stretch & pallet wrap",      search: "stretch wrap" },
+  { label: "Foil & foil trays",          search: "aluminium foil" },
+  { label: "Plates",                     search: "plates" },
+  { label: "Bin liners",                 search: "garbage bag" },
+  { label: "Gift & premium bags",        search: "millinary" },
+];
 import type { Product, Industry } from "@/data/products";
 import { getStockInfo } from "@/lib/stock";
 import { MOCK_PRODUCTS } from "@/data/mockProducts";
@@ -417,30 +449,32 @@ function ProductsPage() {
           </div>
         </div>
 
-        {/* Filter row */}
-        <div className="scrollbar-hide mt-4 flex items-center gap-2 overflow-x-auto pb-3">
-          {industries.map((ind) => {
-            const active = selectedIndustry?.id === ind.id;
-            const Icon = ind.icon;
-            return (
+        {/* Quick find — always visible, works whether the customer knows the
+            product name or just has a rough idea of what they need. */}
+        <div className="mt-5">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Not sure what it&apos;s called? Tap what you need
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {GLOBAL_QUICK_FINDS.map((item) => (
               <button
-                key={ind.id}
+                key={item.search}
                 type="button"
-                onClick={() => toggleIndustry(ind.slug)}
-                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-xs font-medium transition-colors ${
-                  active
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-foreground/20 bg-cream text-foreground hover:border-primary/40 hover:bg-primary/5"
+                onClick={() => { setQuery(item.search); setSearchResults(null); }}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  query === item.search
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-foreground/20 bg-cream text-foreground hover:border-primary/40 hover:bg-primary/5"
                 }`}
               >
-                {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
-                {ind.name}
+                {item.label}
               </button>
-            );
-          })}
+            ))}
+          </div>
+        </div>
 
-          <span className="mx-1 h-5 w-px bg-border" aria-hidden />
-
+        {/* Status toggles */}
+        <div className="scrollbar-hide mt-3 flex items-center gap-2 overflow-x-auto pb-3">
           <ToggleChip active={!!newArrivals} onClick={() => toggle("newArrivals")}>New Arrivals</ToggleChip>
           <ToggleChip active={!!deals} onClick={() => toggle("deals")}>Deals</ToggleChip>
           <ToggleChip active={!!fastMoving} onClick={() => toggle("fastMoving")}>Fast Moving</ToggleChip>
@@ -564,6 +598,42 @@ function ProductsPage() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Browse by business type — shown when no filter active and data is loaded */}
+        {!anyFilterActive && !isLoading && !searchResults && industries.length > 0 && (
+          <div className="mt-8">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              What does your business do?
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              {industries.map((ind) => {
+                const Icon = ind.icon;
+                return (
+                  <button
+                    key={ind.id}
+                    type="button"
+                    onClick={() => toggleIndustry(ind.slug)}
+                    className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm"
+                  >
+                    {Icon && (
+                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/15">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground">{ind.name}</p>
+                      {ind.description && (
+                        <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                          {ind.description}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
