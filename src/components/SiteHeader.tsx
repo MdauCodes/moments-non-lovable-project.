@@ -15,11 +15,10 @@ import { useAuth } from "@/contexts/AuthContext";
 type SimpleNav = { to: string; label: string };
 
 const simpleNav: readonly SimpleNav[] = [
-  { to: "/products?deals=true", label: "Deals" },
-  { to: "/about", label: "About" },
   { to: "/company-profile", label: "Company" },
+  { to: "/company-profile#sustainability", label: "Sustainability" },
   { to: "/orders/track", label: "Track Order" },
-  { to: "/enterprise-quote", label: "Enterprise" },
+  { to: "/products?deals=true", label: "Deals" },
 ];
 
 export function SiteHeader() {

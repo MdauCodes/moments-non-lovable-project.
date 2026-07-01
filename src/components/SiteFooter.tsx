@@ -41,8 +41,8 @@ export function SiteFooter() {
             <span className="font-display text-xl">Moments Packaging</span>
           </div>
           <p className="mt-4 max-w-md text-sm text-primary-foreground/70">
-            Custom-branded paper packaging built for Kenya&apos;s restaurants, retailers and brands. From a 100-bag
-            pilot run to enterprise contracts — delivered nationwide.
+            Custom-branded packaging for Kenya&apos;s restaurants, retailers and brands — bags, boxes, cups and more.
+            From a 100-bag pilot run to enterprise contracts — delivered nationwide.
           </p>
         </div>
 
@@ -85,13 +85,13 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
-              <Link to="/about" className="hover:text-accent">
-                About
+              <Link to="/company-profile" className="hover:text-accent">
+                Company Profile
               </Link>
             </li>
             <li>
-              <Link to="/company-profile" className="hover:text-accent">
-                Company Profile
+              <Link to="/company-profile#sustainability" className="hover:text-accent">
+                Sustainability
               </Link>
             </li>
             <li>

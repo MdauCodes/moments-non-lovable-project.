@@ -71,7 +71,7 @@ const CATEGORIES = [
   { name: "Agriculture", desc: "Sacks, liners, kraft", Icon: Sprout, search: { category: "bags" } },
   { name: "Cosmetics", desc: "Boxes, pouches, labels", Icon: Gem, search: { category: "boxes" } },
   { name: "Stationery & General", desc: "Mailers, wraps", Icon: PencilLine, search: { category: "boxes" } },
-  { name: "Kitchen Supplies", desc: "Food-safe containers", Icon: CookingPot, search: { category: "boxes" } },
+  { name: "Kitchen Essentials", desc: "Food-safe containers", Icon: CookingPot, search: { category: "boxes" } },
   { name: "Enterprise", desc: "10,000+ unit runs", Icon: Briefcase, search: { category: "boxes" } },
 ];
 
@@ -82,7 +82,7 @@ const HERO_INDUSTRIES = [
   { Icon: Sprout, label: "Agriculture", search: { category: "bags" } },
   { Icon: Gem, label: "Cosmetics", search: { category: "boxes" } },
   { Icon: PencilLine, label: "Stationery & General", search: { category: "boxes" } },
-  { Icon: CookingPot, label: "Kitchen Supplies", search: { category: "boxes" } },
+  { Icon: CookingPot, label: "Kitchen Essentials", search: { category: "boxes" } },
 ];
 
 // ── First-visit splash ──
@@ -280,17 +280,20 @@ function Hero() {
               <Link to="/products" className="hover:opacity-80">
                 Shop
               </Link>
+              <Link to="/company-profile" className="hover:opacity-80">
+                Company
+              </Link>
+              <Link to="/company-profile#sustainability" className="hover:opacity-80">
+                Sustainability
+              </Link>
+              <Link to="/orders/track" className="hover:opacity-80">
+                Track Order
+              </Link>
               <Link to="/products?deals=true"
                 style={{ color: "#e8c878" }}
                 className="hover:opacity-80"
               >
                 Deals
-              </Link>
-              <Link to="/orders/track" className="hover:opacity-80">
-                Track Order
-              </Link>
-              <Link to="/enterprise-quote" className="hover:opacity-80">
-                Enterprise
               </Link>
             </div>
             <div className="flex items-center gap-4 text-white">

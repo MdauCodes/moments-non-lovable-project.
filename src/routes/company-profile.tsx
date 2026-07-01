@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
+import { useEffect } from "react";
 import {
   Download,
   ArrowRight,
@@ -31,7 +32,6 @@ import cupsBeverageImg from "@/assets/company-profile/cups-beverage.jpg";
 import woodenImg from "@/assets/company-profile/wooden-products.jpg.asset.json";
 import dessertImg from "@/assets/company-profile/dessert-cups.jpg.asset.json";
 import bagsImg from "@/assets/company-profile/bags-sacks.jpg.asset.json";
-import contactImg from "@/assets/company-profile/contact-products.jpg.asset.json";
 import esgPoster1 from "@/assets/company-profile/esg-poster-1.jpg.asset.json";
 import introImg from "@/assets/company-profile/intro.jpg.asset.json";
 import {
@@ -69,7 +69,7 @@ const INDUSTRIES = [
   { Icon: Sprout, title: "Agriculture" },
   { Icon: Gem, title: "Cosmetics" },
   { Icon: PencilLine, title: "Stationery & General Supplies" },
-  { Icon: CookingPot, title: "Kitchen Supplies" },
+  { Icon: CookingPot, title: "Kitchen Essentials" },
 ];
 
 // NOTE: asset file names don't match their visual contents —
@@ -147,6 +147,20 @@ const DISPLAY_PHONE_ALT = "0119-55-66-99";
 const DISPLAY_ADDRESS = "Weithaga Building, along Ukwala Road, OTC, Nairobi CBD";
 
 function CompanyProfilePage() {
+  const { hash } = useLocation();
+
+  // React Router doesn't auto-scroll to URL hash on client-side navigation —
+  // needed so header/footer "Sustainability" links actually jump there.
+  // Re-scrolls a few times because images above this section load async and
+  // shift the layout after the first scroll fires.
+  useEffect(() => {
+    if (!hash) return;
+    const targetId = hash.slice(1);
+    const scroll = () => document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const timers = [100, 500, 1200].map((ms) => window.setTimeout(scroll, ms));
+    return () => timers.forEach(window.clearTimeout);
+  }, [hash]);
+
   return (
     <SiteLayout>
       {/* ─── HERO ─── */}
@@ -275,6 +289,23 @@ function CompanyProfilePage() {
             designed for everyday business needs across food, beverages, cosmetics, retail and more. With a focus on
             reliability, convenience and excellent customer service, we deliver innovative packaging countrywide while
             helping brands create memorable moments through great presentation.
+          </p>
+          <p className="mt-4 text-base leading-relaxed text-white/70">
+            <span className="font-semibold" style={{ color: GOLD_SOFT }}>
+              The meaning behind our logo:
+            </span>{" "}
+            our logo reflects our environmental commitment through two powerful symbols. The{" "}
+            <span className="font-semibold" style={{ color: GOLD_SOFT }}>
+              sprouting leaf
+            </span>{" "}
+            represents growth, renewal and our dedication to building a greener future through responsible innovation
+            and environmentally conscious business practices. The{" "}
+            <span className="font-semibold" style={{ color: GOLD_SOFT }}>
+              recycling symbol ♻️
+            </span>{" "}
+            embodies our belief in the circular economy, encouraging the reduction of waste through recycling, reuse
+            and responsible disposal of packaging materials. Together, these elements symbolize our promise to provide
+            packaging solutions that respect both people and the planet.
           </p>
           <p className="mt-4 text-base leading-relaxed text-white/70">
             Packaging is more than a container — it is a powerful marketing tool that creates lasting first impressions,
@@ -515,23 +546,6 @@ function CompanyProfilePage() {
               shapes the way we design, source and deliver packaging solutions. We are committed to creating products
               that support our customers while contributing to a healthier planet and a more sustainable future.
             </p>
-            <p className="font-semibold text-sm" style={{ color: GOLD_SOFT }}>
-              The Meaning Behind Our Logo
-            </p>
-            <p>
-              Our logo reflects our environmental commitment through two powerful symbols. The{" "}
-              <span className="font-semibold" style={{ color: GOLD_SOFT }}>
-                sprouting leaf
-              </span>{" "}
-              represents growth, renewal and our dedication to building a greener future through responsible innovation
-              and environmentally conscious business practices. The{" "}
-              <span className="font-semibold" style={{ color: GOLD_SOFT }}>
-                recycling symbol ♻️
-              </span>{" "}
-              embodies our belief in the circular economy, encouraging the reduction of waste through recycling, reuse
-              and responsible disposal of packaging materials. Together, these elements symbolize our promise to provide
-              packaging solutions that respect both people and the planet.
-            </p>
             <p>
               We actively promote environmentally responsible alternatives by expanding our range of Kraft packaging
               solutions, which are designed with sustainability in mind. Many of our Kraft products are eco-friendly
@@ -619,7 +633,7 @@ function CompanyProfilePage() {
 
       {/* ─── CONTACT ─── */}
       <section className="relative" style={{ background: FOREST }}>
-        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 lg:grid-cols-2 lg:items-center lg:gap-14 lg:px-8 lg:py-20">
+        <div className="mx-auto max-w-3xl px-5 py-16 lg:px-8 lg:py-20">
           <div>
             <p className="text-[12px] font-semibold uppercase tracking-[0.32em]" style={{ color: GOLD }}>
               Get in touch
@@ -697,10 +711,6 @@ function CompanyProfilePage() {
                 <Download className="h-4 w-4" /> Download PDF
               </a>
             </div>
-          </div>
-
-          <div className="relative overflow-hidden rounded-3xl border p-3 sm:p-4" style={{ borderColor: `${GOLD}55` }}>
-            <img src={contactImg.url} alt="Moments Packaging product showcase" className="w-full rounded-2xl" />
           </div>
         </div>
 
