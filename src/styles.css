@@ -79,6 +79,10 @@
   --kraft-foreground: oklch(0.99 0.01 85);
   --forest: oklch(0.32 0.045 155);
   --forest-foreground: oklch(0.97 0.02 85);
+  /* Brighter green for small always-visible UI (e.g. mobile bottom nav
+     active state) where the dark --forest/--primary reads as too muted
+     against a light background at icon size. */
+  --forest-bright: oklch(0.55 0.13 155);
   --clay: oklch(0.62 0.16 35);
   --ink: oklch(0.18 0.02 60);
 

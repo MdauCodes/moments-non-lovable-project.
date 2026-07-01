@@ -35,7 +35,7 @@ export function BottomNav() {
       <Link
         to="/"
         className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium ${
-          isActive("/") ? "text-primary" : "text-muted-foreground"
+          isActive("/") ? "text-[var(--forest-bright)]" : "text-muted-foreground"
         }`}
       >
         <Home className="h-5 w-5" strokeWidth={isActive("/") ? 2.25 : 1.75} />
@@ -45,7 +45,7 @@ export function BottomNav() {
       <Link
         to="/products"
         className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium ${
-          isActive("/products") ? "text-primary" : "text-muted-foreground"
+          isActive("/products") ? "text-[var(--forest-bright)]" : "text-muted-foreground"
         }`}
       >
         <LayoutGrid className="h-5 w-5" strokeWidth={isActive("/products") ? 2.25 : 1.75} />
@@ -67,7 +67,7 @@ export function BottomNav() {
       <Link
         to="/cart"
         className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium ${
-          isActive("/cart") ? "text-primary" : "text-muted-foreground"
+          isActive("/cart") ? "text-[var(--forest-bright)]" : "text-muted-foreground"
         }`}
       >
         <span className="relative">
@@ -85,7 +85,7 @@ export function BottomNav() {
         type="button"
         onClick={() => navigate(isAuthenticated ? "/account/orders" : "/account/login")}
         className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium ${
-          isActive("/account") ? "text-primary" : "text-muted-foreground"
+          isActive("/account") ? "text-[var(--forest-bright)]" : "text-muted-foreground"
         }`}
       >
         <User className="h-5 w-5" strokeWidth={isActive("/account") ? 2.25 : 1.75} />

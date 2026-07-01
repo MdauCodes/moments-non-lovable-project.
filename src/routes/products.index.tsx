@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Search, X } from "lucide-react";
+import { Check, ChevronRight, ListFilter, Search, X } from "lucide-react";
 import { z } from "zod";
 import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCardSkeleton } from "@/components/ProductCardSkeleton";
@@ -98,6 +98,16 @@ const GLOBAL_QUICK_FINDS: Array<{ label: string; search: string }> = [
   { label: "Plates",                     search: "plates" },
   { label: "Bin liners",                 search: "garbage bag" },
   { label: "Gift & premium bags",        search: "millinary" },
+  // Added after checking real per-industry product counts — Agriculture (86),
+  // Fashion & Apparel (64) and Health & Beauty (49) all had real inventory
+  // that wasn't represented above. Verified against live search results.
+  { label: "Farm & market sacks",        search: "khaki bags" },
+  { label: "Printed smart bags",         search: "smart bags" },
+  { label: "Brown handled bags",         search: "brown handled" },
+  { label: "Ice cream cups",             search: "ice cream cups" },
+  { label: "Wet wipes",                  search: "wet wipes" },
+  { label: "Manila envelopes",           search: "manila envelope" },
+  { label: "Foil tins",                  search: "foil tin" },
 ];
 import type { Product, Industry } from "@/data/products";
 import { getStockInfo } from "@/lib/stock";
@@ -471,18 +481,29 @@ function ProductsPage() {
 
         {/* Quick find trigger — opens a modal so the customer can pick several
             needs at once, then jumps straight to matching products instead of
-            scrolling past rows of chips first. */}
+            scrolling past rows of chips first. Copy leads with the benefit
+            (fast, shortlisted results) instead of asking the customer to
+            self-diagnose ("not sure what it's called?") — a clearer signal
+            of what tapping this actually does. */}
         <button
           type="button"
           onClick={() => setQuickFindOpen(true)}
-          className="mt-5 flex w-full items-center justify-between rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/10"
+          className="mt-5 flex w-full items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3.5 text-left transition-colors hover:border-primary/50 hover:bg-primary/10"
         >
-          <span className="text-sm font-medium text-foreground">
-            {selectedQuickFinds.length > 0
-              ? `${selectedQuickFinds.length} quick find${selectedQuickFinds.length === 1 ? "" : "s"} selected`
-              : "Not sure what it's called? Tap what you need"}
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+            <ListFilter className="h-5 w-5" />
           </span>
-          <span className="text-xs font-semibold text-primary">Browse →</span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-foreground">
+              {selectedQuickFinds.length > 0
+                ? `${selectedQuickFinds.length} need${selectedQuickFinds.length === 1 ? "" : "s"} selected`
+                : "Find it in 2 taps"}
+            </span>
+            <span className="block text-xs text-muted-foreground">
+              {selectedQuickFinds.length > 0 ? "Tap to change your selection" : "Tap what you need — we'll shortlist matching products"}
+            </span>
+          </span>
+          <ChevronRight className="h-4 w-4 shrink-0 text-primary" />
         </button>
 
         {/* Status toggles */}
