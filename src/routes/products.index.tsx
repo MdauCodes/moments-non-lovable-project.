@@ -201,6 +201,7 @@ function ProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchResults, setSearchResults] = useState<Product[] | null>(null);
+  const [moreProducts, setMoreProducts] = useState<Product[] | null>(null);
   const [query, setQuery] = useState(q ?? "");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [quickFindOpen, setQuickFindOpen] = useState(false);
@@ -368,6 +369,24 @@ function ProductsPage() {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
+
+  // "Keep browsing" — search results are capped (12 items, no pagination),
+  // so without this a customer who searched hits a hard dead end. Fetch a
+  // diversified mix and exclude anything already shown above.
+  useEffect(() => {
+    if (!searchResults || searchResults.length === 0) { setMoreProducts(null); return; }
+    let cancelled = false;
+    const shownIds = new Set(searchResults.map((p) => p.id));
+    void api
+      .getDiversifiedProducts({ size: 20 })
+      .then((data) => {
+        if (!cancelled) setMoreProducts(data.filter((p) => !shownIds.has(p.id)));
+      })
+      .catch(() => {
+        if (!cancelled) setMoreProducts([]);
+      });
+    return () => { cancelled = true; };
+  }, [searchResults]);
 
   const setParam = (key: string, value: string | number | boolean | undefined) => {
     setSearchParams((prev) => { const v = value; if (v !== undefined && v !== "") prev.set(key, String(v)); else prev.delete(key); return prev; });
@@ -781,6 +800,30 @@ function ProductsPage() {
                   </div>
                 )}
                 <div ref={sentinelRef} className="h-1 w-full" />
+              </div>
+            )}
+
+            {/* Keep browsing — search results are capped with no pagination,
+                so without this a customer who used quick-find or the search
+                box hits a dead end after 12 items. */}
+            {searchResults && moreProducts && moreProducts.length > 0 && (
+              <div className="mt-14 border-t border-border pt-10">
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Keep browsing
+                  </p>
+                  <Link
+                    to="/products"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  >
+                    See all products →
+                  </Link>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+                  {moreProducts.slice(0, 8).map((p) => (
+                    <ProductCard key={p.id} product={p} onConfigure={handleConfigure} />
+                  ))}
+                </div>
               </div>
             )}
           </>
