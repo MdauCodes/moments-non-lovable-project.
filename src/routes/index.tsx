@@ -9,6 +9,7 @@ import { AppSplash } from "@/components/AppSplash";
 import { BottomNav } from "@/components/BottomNav";
 import { AddToHomeScreenPrompt } from "@/components/AddToHomeScreenPrompt";
 import { GuaranteeBand } from "@/components/GuaranteeBand";
+import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { LatestBlogsStrip } from "@/components/blog/LatestBlogsStrip";
 import { ProductCardSkeleton } from "@/components/ProductCardSkeleton";
 import { ProductCard } from "@/components/ProductCard";
@@ -832,10 +833,7 @@ function HomePage() {
             bg="background"
           />
           <CategoryGrid />
-          {/* TestimonialsSection: re-add once real customer quotes exist —
-              see the warning comment at the top of TestimonialsSection.tsx.
-              Shipping placeholder "[Awaiting a real customer quote]" text to
-              real visitors reads as a broken/unfinished site. */}
+          <TestimonialsSection />
           <AudiencesWeServe />
           <LatestBlogsStrip />
         </main>
