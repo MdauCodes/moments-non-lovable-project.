@@ -57,7 +57,9 @@ export default function ProductDetail() {
         .sort((a, b) => (a.sortOrder ?? a.quantity) - (b.sortOrder ?? b.quantity));
       setProduct(p);
       setVariantId(variants[0]?.id ?? variants[0]?.label);
-      setSize(p.sizes?.[0] ?? "");
+      // Never pre-select a size — a customer who never touches this control must not silently
+      // "order" size #1. handleAddToCart blocks Add to Cart until a real choice is made.
+      setSize("");
       setMaterial((p as any).materials?.[0] ?? p.material ?? "");
       setFinish(p.finish ?? "Standard");
       setQty(p.moq);
@@ -159,16 +161,23 @@ export default function ProductDetail() {
     setQtyError(null);
   };
 
+  const hasSizeOptions = (product?.sizes?.length ?? 0) > 0;
+  const sizeMissing = hasSizeOptions && !size;
+
   const handleAddToCart = () => {
     if (!product) return;
     if (!stock.canOrder) return; // UI already hides this control — guard in case that ever changes
     if (enterprise) { navigate("/enterprise-quote"); return; }
     if (qty < minQty) { setQtyError(`Minimum: ${minQty.toLocaleString()}`); return; }
+    if (sizeMissing) return; // the Size field's own inline prompt (sizeMissing) is already visible
     addItem({
       productId: product.id,
       productName: product.name,
       primaryImageUrl: product.primaryImageUrl ?? "",
-      size: size || "Standard",
+      // No "Standard" fallback — sizeMissing already blocks getting here without a real choice
+      // when the product has size options; a product with none sends "", which the backend's
+      // validateSizeSelection skips entirely.
+      size,
       material: material || "Standard",
       finish: finish || "Standard",
       quantity: qty,
@@ -371,7 +380,10 @@ export default function ProductDetail() {
             )}
 
             {stock.canOrder && product.sizes && product.sizes.length > 0 && (
-              <ConfigField label="Size"><PillGroup options={product.sizes} value={size} onChange={setSize} /></ConfigField>
+              <ConfigField label="Size">
+                <PillGroup options={product.sizes} value={size} onChange={setSize} />
+                {sizeMissing && <p className="mt-1.5 text-xs font-medium text-accent">Please choose a size</p>}
+              </ConfigField>
             )}
             {stock.canOrder && ((product as any).materials?.length ?? 0) > 0 && (
               <ConfigField label="Material"><PillGroup options={(product as any).materials!} value={material} onChange={setMaterial} /></ConfigField>
@@ -434,8 +446,13 @@ export default function ProductDetail() {
                 Request enterprise quote →
               </button>
             ) : (
-              <button type="button" onClick={handleAddToCart}
-                className="h-[52px] w-full rounded-full bg-accent text-sm font-semibold text-accent-foreground shadow-sm transition-opacity hover:opacity-90">
+              <button type="button" onClick={handleAddToCart} disabled={sizeMissing}
+                title={sizeMissing ? "Please choose a size first" : undefined}
+                className={`h-[52px] w-full rounded-full text-sm font-semibold shadow-sm transition-opacity ${
+                  sizeMissing
+                    ? "cursor-not-allowed bg-accent/40 text-accent-foreground/60"
+                    : "bg-accent text-accent-foreground hover:opacity-90"
+                }`}>
                 {stock.isBackorder ? "Add to cart (backorder)" : "Add to cart"}
               </button>
             )}
