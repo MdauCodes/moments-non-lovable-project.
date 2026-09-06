@@ -129,6 +129,32 @@ async function uploadTaxInvoicePdf(order: CustomerOrder, uploadToken: string, bu
  *  payment-related), without requiring an account. */
 const GUEST_CHECKOUT_KEY = "mpk_guest_checkout_details_v1";
 
+/** One JSON object, note key -> the customer's last-typed preference note (e.g. "Khaki, size 14"
+ *  for a product whose real colour/model options aren't yet structured attributes — see the
+ *  Confirm step). Read on entering the Confirm step to prefill a returning customer's note for
+ *  the same product+size+tier combination; written on every edit, not just on Continue, so a
+ *  half-typed note surviving an accidental tab close is a nice side effect, not the point.
+ *
+ *  Keyed by product+size+tier, NOT bare productId: a cart can hold two lines of the same product
+ *  in different sizes (e.g. a Gift Box in both Small and Large — CartContext.addItem creates
+ *  genuinely separate lines for these), and a bare-productId key would have one line's input
+ *  silently overwrite the other's, with both order lines then receiving whichever note was typed
+ *  last. */
+const ITEM_VARIANT_NOTES_KEY = "mpk_item_variant_notes_v1";
+
+function noteKeyFor(item: { productId: string; size?: string | null; tierId?: string | null }): string {
+  return `${item.productId}|${item.size ?? ""}|${item.tierId ?? ""}`;
+}
+
+function loadSavedItemNotes(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(ITEM_VARIANT_NOTES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
 /** Everything the guest-checkout localStorage blob can carry — the plain contact/address fields
  *  passively prefill blank inputs (existing behavior), while `fulfillment`/`resolvedAddress` are
  *  only ever applied via the explicit "Use my saved details" one-tap shortcut (never silently, so
@@ -156,7 +182,7 @@ const MAX_POLLS = 20;
 const TIMEOUT_MS = POLL_MS * MAX_POLLS;
 const RESEND_AFTER_MS = 30_000;
 
-type Step = "contact" | "delivery";
+type Step = "contact" | "confirm" | "delivery";
 type PayState = "idle" | "sending" | "waiting" | "success" | "failed" | "timeout";
 
 function fmt(n: number) {
@@ -221,6 +247,23 @@ function CheckoutModal() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState<Step>("contact");
+
+  // Confirm step — see ITEM_VARIANT_NOTES_KEY's own comment. Lazy-init from localStorage so a
+  // returning customer's note for a product they've bought before is already there.
+  const [itemNotes, setItemNotes] = useState<Record<string, string>>(() => loadSavedItemNotes());
+
+  function updateItemNote(noteKey: string, note: string) {
+    setItemNotes((prev) => {
+      const next = { ...prev, [noteKey]: note };
+      try {
+        localStorage.setItem(ITEM_VARIANT_NOTES_KEY, JSON.stringify(next));
+      } catch {
+        // localStorage can throw in a private window with storage blocked — the note still
+        // works for this session via state, it just won't survive to the next visit.
+      }
+      return next;
+    });
+  }
 
   // Stable idempotency key for this checkout session — prevents duplicate orders on retry
   const idempotencyKey = useRef<string>(
@@ -841,7 +884,7 @@ function CheckoutModal() {
     e.preventDefault();
     if (!validateContactInfo()) return;
     trackFunnelStep("CONTACT_COMPLETED", { email: email.trim(), phone: normalizePhone(phone) });
-    setStep("delivery");
+    setStep("confirm");
   }
 
   function validateDeliveryDetails(): boolean {
@@ -1010,7 +1053,11 @@ function CheckoutModal() {
 
       if (!id) {
         const { order } = await orderStore.placeOrder({
-          items,
+          // Merges each line's Confirm-items-step note in by the same product+size+tier key
+          // used to render it (see noteKeyFor) — a bare productId key would collide when the
+          // cart holds two lines of the same product in different sizes. itemNotes is
+          // checkout-local state (see its own declaration), never part of the cart itself.
+          items: items.map((it) => ({ ...it, variantNote: itemNotes[noteKeyFor(it)] || undefined })),
           customer: {
             name: name.trim(),
             email: email.trim(),
@@ -1241,9 +1288,14 @@ function CheckoutModal() {
       {/* Step indicator */}
       <div className="border-b border-border bg-card/50">
         <div className="mx-auto flex max-w-2xl items-center justify-center gap-3 px-4 py-3 text-xs sm:text-sm">
-          <StepDot active={step === "contact"} done={step !== "contact"} label="1. Contact" />
+          {/* shortLabel on mobile — three full labels ("3. Delivery & payment" is the long one)
+              overflow a 375px-wide bar; HANDOFF.md already documents this exact regression once
+              before, when the indicator briefly went from 2 steps to 3. */}
+          <StepDot active={step === "contact"} done={step !== "contact"} label="1. Contact" shortLabel="Contact" />
           <span className="h-px w-6 bg-border sm:w-16" />
-          <StepDot active={step === "delivery"} done={false} label="2. Delivery & payment" />
+          <StepDot active={step === "confirm"} done={step === "delivery"} label="2. Confirm items" shortLabel="Items" />
+          <span className="h-px w-6 bg-border sm:w-16" />
+          <StepDot active={step === "delivery"} done={false} label="3. Delivery & payment" shortLabel="Delivery" />
         </div>
       </div>
 
@@ -1314,12 +1366,85 @@ function CheckoutModal() {
             </form>
           )}
 
+          {step === "confirm" && (
+            <div className="space-y-5">
+              <button
+                type="button"
+                onClick={() => setStep("contact")}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:bg-secondary"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back
+              </button>
+
+              <div>
+                <h2 className="font-display text-2xl text-foreground">Confirm What You're Ordering</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Double-check the size on each item before we prepare your order — this is the
+                  easiest place to catch a mistake, before it's packed.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {items.map((it) => (
+                  <div key={it.id} className="rounded-xl border border-border bg-card p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary">
+                        {it.primaryImageUrl ? (
+                          <img src={it.primaryImageUrl} alt={it.productName} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="h-full w-full bg-muted" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-display text-sm text-foreground">{it.productName}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">Qty: {it.quantity}</p>
+                        {it.size ? (
+                          <span
+                            className="mt-1.5 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                            style={{ backgroundColor: `${BRAND}1a`, color: BRAND }}
+                          >
+                            Size: {it.size}
+                          </span>
+                        ) : (
+                          <p className="mt-1.5 text-xs text-muted-foreground/70">No size options for this item</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-3">
+                      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Colour / style preference <span className="font-normal normal-case">(optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={itemNotes[noteKeyFor(it)] ?? ""}
+                        onChange={(e) => updateItemNote(noteKeyFor(it), e.target.value)}
+                        placeholder="e.g. Khaki, or &quot;No. 14&quot; model"
+                        maxLength={200}
+                        className={inputCls}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setStep("delivery")}
+                className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:opacity-90"
+                style={{ backgroundColor: BRAND }}
+              >
+                Continue <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
           {step === "delivery" && !detailsConfirmed && payState === "idle" && (
             <>
             <form onSubmit={handleDeliveryDetailsSubmit} className="space-y-5">
               <button
                 type="button"
-                onClick={() => setStep("contact")}
+                onClick={() => setStep("confirm")}
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition hover:bg-secondary"
               >
                 <ArrowLeft className="h-4 w-4" /> Back
@@ -1428,6 +1553,12 @@ function CheckoutModal() {
                         Tip: a single landmark or area name (e.g. "Yaya Center") often finds it faster than a full
                         address.
                       </p>
+                      {/* Same visual language as the Confirm-items step's "Please choose a size" —
+                          a persistent, colored prompt rather than only a toast on submit attempt,
+                          so the customer sees this needs completing before they even try to continue. */}
+                      {!addressText.trim() && (
+                        <p className="mb-2 text-xs font-medium text-accent">Please enter or select your delivery address</p>
+                      )}
                       <button
                         type="button"
                         onClick={useMyLocation}
@@ -2283,7 +2414,9 @@ function CheckoutModal() {
                       {items.map((it) => (
                         <li key={it.id} className="flex justify-between gap-3">
                           <span className="text-foreground/90">
-                            {it.productName} <span className="text-muted-foreground">× {it.quantity}</span>
+                            {it.productName}
+                            {it.size && <span className="text-muted-foreground"> ({it.size})</span>}{" "}
+                            <span className="text-muted-foreground">× {it.quantity}</span>
                           </span>
                           <span className="tabular-nums">{fmt(it.lineTotal)}</span>
                         </li>

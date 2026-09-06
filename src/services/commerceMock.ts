@@ -31,6 +31,8 @@ export interface OrderItem {
   size?: string;
   material?: string;
   finish?: string;
+  /** Optional colour/style preference the customer typed on the checkout Confirm-items step. */
+  variantNote?: string;
   lineTotal?: number;
 }
 

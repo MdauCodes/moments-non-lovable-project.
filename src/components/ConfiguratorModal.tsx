@@ -69,7 +69,9 @@ export function ConfiguratorModal({ product, onClose, preSelectedTierId }: Confi
 
   useEffect(() => {
     if (!product) return;
-    setSize(product.sizes?.[0] ?? "");
+    // Never pre-select a size — a customer who never touches this control must not silently
+    // "order" size #1. handleAdd blocks Add to Cart until a real choice is made.
+    setSize("");
     setMaterial(product.materials?.[0] ?? product.material ?? "");
     setFinish(product.finish ?? "Standard");
     setError(null);
@@ -113,10 +115,17 @@ export function ConfiguratorModal({ product, onClose, preSelectedTierId }: Confi
     setError(n < minQty ? `Minimum: ${minQty.toLocaleString()}` : null);
   };
 
+  const hasSizeOptions = (product.sizes?.length ?? 0) > 0;
+  const sizeMissing = hasSizeOptions && !size;
+
   const handleAdd = () => {
     if (!stock.canOrder) return; // UI already hides this control — guard in case that ever changes
     if (quantity < minQty) {
       setError(`Minimum: ${minQty.toLocaleString()}`);
+      return;
+    }
+    if (sizeMissing) {
+      setError("Please choose a size");
       return;
     }
     addItem({
@@ -124,7 +133,10 @@ export function ConfiguratorModal({ product, onClose, preSelectedTierId }: Confi
       productName: product.name,
 
       primaryImageUrl: product.primaryImageUrl ?? "",
-      size: size || "Standard",
+      // No "Standard" fallback — a product with real size options must carry the customer's
+      // actual choice (sizeMissing already blocks getting here without one); a product with no
+      // size options at all sends "", which the backend's validateSizeSelection skips entirely.
+      size,
       material: material || "Standard",
       finish: finish || "Standard",
       quantity,
@@ -337,6 +349,9 @@ export function ConfiguratorModal({ product, onClose, preSelectedTierId }: Confi
           {stock.canOrder && product.sizes && product.sizes.length > 0 && (
             <Section label="Size">
               <PillGroup options={product.sizes} value={size} onChange={setSize} />
+              {sizeMissing && (
+                <p className="mt-1.5 text-xs font-medium text-accent">Please choose a size</p>
+              )}
             </Section>
           )}
           {stock.canOrder && (product.materials?.length ?? 0) > 0 && (
@@ -414,7 +429,13 @@ export function ConfiguratorModal({ product, onClose, preSelectedTierId }: Confi
             <button
               type="button"
               onClick={handleAdd}
-              className="w-full rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-accent-foreground shadow-sm transition-opacity hover:opacity-90"
+              disabled={sizeMissing}
+              title={sizeMissing ? "Please choose a size first" : undefined}
+              className={`w-full rounded-full px-6 py-3.5 text-sm font-semibold shadow-sm transition-opacity ${
+                sizeMissing
+                  ? "cursor-not-allowed bg-accent/40 text-accent-foreground/60"
+                  : "bg-accent text-accent-foreground hover:opacity-90"
+              }`}
             >
               Add to cart
             </button>
