@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AgeBadge, formatKes } from "@/components/admin/commerceUi";
 import { GenericNextActionButton } from "@/components/admin/GenericNextActionButton";
 import { TumaBodaOtpChip } from "@/components/admin/TumaBodaOtpCard";
@@ -20,6 +22,7 @@ import type { OrderRecord } from "@/services/commerceMock";
  */
 function AllOrdersCard({
   order,
+  columnKey,
   onOpen,
   onOrderUpdated,
   canAssign,
@@ -27,6 +30,7 @@ function AllOrdersCard({
   onToggleSelect,
 }: {
   order: OrderRecord & Record<string, any>;
+  columnKey: string | null;
   onOpen: (id: string) => void;
   onOrderUpdated: (order: OrderRecord) => void;
   canAssign: boolean;
@@ -55,7 +59,14 @@ function AllOrdersCard({
           )}
           <b>{order.reference}</b>
         </span>
-        <AgeBadge since={order.createdAt} />
+        {/* Same treatment as FulfillmentBoard's own cards: badge time-since-completion, not
+         *  time-since-creation, once an order is done — otherwise an order that took days to
+         *  fulfil but completed minutes ago reads as stale when it's actually current. */}
+        {columnKey === "completed" || columnKey === "closed" ? (
+          <AgeBadge since={order.completedAt ?? order.createdAt} warnAfterHours={Infinity} urgentAfterHours={Infinity} />
+        ) : (
+          <AgeBadge since={order.createdAt} />
+        )}
       </div>
       <div className="admin-card-row" style={{ fontSize: 11.5, color: "var(--admin-muted)" }}>
         <span className="admin-board-card-truncate">{order.customerName}</span>
@@ -119,6 +130,39 @@ export function AllOrdersBoard({
     if (key && byColumn.has(key)) byColumn.get(key)!.push(order);
   }
 
+  // Same UX fix as FulfillmentBoard: "Closed" collapses to a slim strip by default (a cancelled/
+  // refunded/long-closed order essentially never needs a click), and scroll-arrow buttons cover
+  // whatever horizontal scrolling the fluid column widths (styles.css) don't fully eliminate.
+  const [closedExpanded, setClosedExpanded] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollButtons = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    updateScrollButtons();
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => updateScrollButtons();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    const ro = new ResizeObserver(updateScrollButtons);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      ro.disconnect();
+    };
+  }, [closedExpanded]);
+
+  const scrollByAmount = (dir: 1 | -1) => {
+    scrollRef.current?.scrollBy({ left: dir * 260, behavior: "smooth" });
+  };
+
   return (
     <div>
       {awaitingPaymentCount > 0 && (
@@ -127,35 +171,88 @@ export function AllOrdersBoard({
           <span className="admin-badge admin-badge-muted">{awaitingPaymentCount}</span>
         </div>
       )}
-      <div className="admin-board-columns">
-        {ALL_ORDERS_BOARD_COLUMNS.map((col) => {
-          const items = byColumn.get(col.key) ?? [];
-          return (
-            <div key={col.key} className="admin-board-column">
-              <div className="admin-board-column-header">
-                <span>{col.label}</span>
-                <span className="admin-badge admin-badge-muted">{items.length}</span>
+      <div className="admin-board-columns-wrap">
+        {canScrollLeft && (
+          <button
+            type="button"
+            className="admin-board-scroll-btn admin-board-scroll-btn-left"
+            onClick={() => scrollByAmount(-1)}
+            aria-label="Scroll columns left"
+          >
+            <ChevronLeft size={16} />
+          </button>
+        )}
+        {canScrollRight && (
+          <button
+            type="button"
+            className="admin-board-scroll-btn admin-board-scroll-btn-right"
+            onClick={() => scrollByAmount(1)}
+            aria-label="Scroll columns right"
+          >
+            <ChevronRight size={16} />
+          </button>
+        )}
+        <div className="admin-board-columns" ref={scrollRef}>
+          {ALL_ORDERS_BOARD_COLUMNS.map((col) => {
+            const items = byColumn.get(col.key) ?? [];
+            if (col.key === "closed" && !closedExpanded) {
+              return (
+                <div
+                  key={col.key}
+                  className="admin-board-column admin-board-column-collapsed"
+                  onClick={() => setClosedExpanded(true)}
+                  role="button"
+                  tabIndex={0}
+                  title="Show closed orders"
+                >
+                  <span className="admin-board-column-collapsed-label">
+                    {col.label}
+                    <span className="admin-badge admin-badge-muted">{items.length}</span>
+                  </span>
+                </div>
+              );
+            }
+            return (
+              <div key={col.key} className="admin-board-column">
+                <div className="admin-board-column-header">
+                  <span>{col.label}</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span className="admin-badge admin-badge-muted">{items.length}</span>
+                    {col.key === "closed" && (
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-ghost"
+                        style={{ fontSize: 10, padding: "1px 6px" }}
+                        onClick={() => setClosedExpanded(false)}
+                        title="Collapse back to a strip"
+                      >
+                        Collapse
+                      </button>
+                    )}
+                  </span>
+                </div>
+                <div className="admin-board-column-body">
+                  {items.length === 0 ? (
+                    <div style={{ fontSize: 12, color: "var(--admin-muted)", padding: "8px 2px" }}>Empty</div>
+                  ) : (
+                    items.map((o) => (
+                      <AllOrdersCard
+                        key={o.id}
+                        order={o}
+                        columnKey={col.key}
+                        onOpen={onOpenOrder}
+                        onOrderUpdated={onOrderUpdated}
+                        canAssign={canAssign}
+                        selected={!!selectedIds?.has(o.id)}
+                        onToggleSelect={(id) => onToggleSelect?.(id)}
+                      />
+                    ))
+                  )}
+                </div>
               </div>
-              <div className="admin-board-column-body">
-                {items.length === 0 ? (
-                  <div style={{ fontSize: 12, color: "var(--admin-muted)", padding: "8px 2px" }}>Empty</div>
-                ) : (
-                  items.map((o) => (
-                    <AllOrdersCard
-                      key={o.id}
-                      order={o}
-                      onOpen={onOpenOrder}
-                      onOrderUpdated={onOrderUpdated}
-                      canAssign={canAssign}
-                      selected={!!selectedIds?.has(o.id)}
-                      onToggleSelect={(id) => onToggleSelect?.(id)}
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

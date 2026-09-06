@@ -16,6 +16,7 @@ const PAGE_SIZE = 20;
 
 const STATUS_OPTIONS = [
   { value: "ALL", label: "All statuses" },
+  { value: "NEW", label: "New" },
   { value: "VIP", label: "VIP" },
   { value: "ACTIVE", label: "Active" },
   { value: "AT_RISK", label: "At risk" },
@@ -30,6 +31,7 @@ const SEGMENT_OPTIONS = [
 ];
 
 const STATUS_TONE: Record<CustomerRecord["status"], { bg: string; fg: string }> = {
+  NEW: { bg: "rgba(59, 130, 246, 0.15)", fg: "#1d4ed8" },
   VIP: { bg: "rgba(168, 85, 247, 0.18)", fg: "#7e22ce" },
   ACTIVE: { bg: "rgba(34, 197, 94, 0.15)", fg: "#15803d" },
   AT_RISK: { bg: "rgba(234, 179, 8, 0.18)", fg: "#a16207" },

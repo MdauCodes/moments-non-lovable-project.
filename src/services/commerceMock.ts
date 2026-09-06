@@ -190,7 +190,9 @@ export interface CustomerRecord {
   phone: string;
   city: string;
   segment: "RETAIL" | "WHOLESALE" | "ENTERPRISE";
-  status: "VIP" | "ACTIVE" | "AT_RISK" | "DORMANT";
+  /** NEW = zero orders but still within the just-signed-up grace window — see the backend's own
+   *  CustomerDto.Status doc comment for why this is separate from DORMANT. */
+  status: "VIP" | "ACTIVE" | "AT_RISK" | "DORMANT" | "NEW";
   lifetimeValue: number;
   ordersCount: number;
   lastOrderAt?: string;
