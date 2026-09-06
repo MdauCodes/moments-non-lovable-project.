@@ -160,7 +160,14 @@ function AdminCustomersPage() {
                       <td>{formatKes(c.averageOrderValue ?? 0)}</td>
                       <td>{c.referralCount ? <b>{c.referralCount}</b> : <span style={{ color: "var(--admin-muted)" }}>—</span>}</td>
                       <td>{formatDateShort(c.lastOrderAt ?? undefined)}</td>
-                      <td><StatusBadge status={c.status} /></td>
+                      <td>
+                        <StatusBadge status={c.status} />
+                        {c.status !== "ACTIVE" && c.status !== "VIP" && !!c.referralsConverted && (
+                          <div style={{ color: "var(--admin-muted)", fontSize: 10.5, marginTop: 3 }}>
+                            {c.referralsConverted} referred customer{c.referralsConverted === 1 ? "" : "s"} ordered
+                          </div>
+                        )}
+                      </td>
                       <td>
                         <Link to={`/admin/customers/${c.id}`} className="admin-btn admin-btn-ghost">View</Link>
                       </td>

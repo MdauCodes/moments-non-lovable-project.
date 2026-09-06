@@ -33,6 +33,8 @@ export type BusinessAccountDto = {
   industryId?: string | null; industryName?: string | null; contactPersonName: string; contactPersonRole?: string | null;
   phone: string; status: "ACTIVE" | "SUSPENDED"; welcomeCode?: string | null; createdAt: string;
   orderCount?: number | null; totalSpend?: number | null; creditReadiness?: CreditReadinessDto | null;
+  creditApprovalStatus: "PENDING" | "APPROVED" | "REJECTED";
+  creditApprovalDecidedAt?: string | null; creditApprovalDecidedBy?: string | null;
 };
 export type PromoCodeDto = {
   id: string;
@@ -436,10 +438,21 @@ export const adminResources = {
     list: (params: { q?: string; page?: number; size?: number }) =>
       adminJson<PageResponse<BusinessAccountDto>>(`/api/v1/admin/business-accounts${qs(params)}`),
     get: (id: string) => adminJson<BusinessAccountDto>(`/api/v1/admin/business-accounts/${encodeURIComponent(id)}`),
+    /** null for an Individual Shopper (backend returns 204, no BusinessAccount exists). */
+    getByUserId: async (userId: string) => {
+      const res = await adminFetch(`/api/v1/admin/business-accounts/by-user/${encodeURIComponent(userId)}`);
+      if (res.status === 204) return null;
+      if (!res.ok) throw new Error(`Failed to load business account (${res.status})`);
+      return (await res.json()) as BusinessAccountDto;
+    },
     update: (id: string, body: Partial<BusinessAccountDto> & { industryId?: string | null }) =>
       adminJson<BusinessAccountDto>(`/api/v1/admin/business-accounts/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(body) }),
     setStatus: (id: string, status: "ACTIVE" | "SUSPENDED") =>
       adminJson<BusinessAccountDto>(`/api/v1/admin/business-accounts/${encodeURIComponent(id)}/status${qs({ status })}`, { method: "PATCH" }),
+    /** Records admin's trade-profile decision — no functional effect yet, see the backend's own
+     *  CreditApprovalStatus doc comment. Basis for the call: lifetime value + creditReadiness. */
+    setCreditApproval: (id: string, status: "PENDING" | "APPROVED" | "REJECTED") =>
+      adminJson<BusinessAccountDto>(`/api/v1/admin/business-accounts/${encodeURIComponent(id)}/credit-approval${qs({ status })}`, { method: "PATCH" }),
   },
   taxDocuments: {
     list: (params: { status?: TaxDocumentStatus; page?: number; size?: number }) =>

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AgeBadge, formatKes } from "@/components/admin/commerceUi";
 import { GenericNextActionButton } from "@/components/admin/GenericNextActionButton";
 import { TumaBodaOtpChip } from "@/components/admin/TumaBodaOtpCard";
@@ -157,6 +158,48 @@ export function FulfillmentBoard({
     if (key && byColumn.has(key)) byColumn.get(key)!.push(order);
   }
 
+  // "Closed" defaults to a slim collapsed strip, not a full column — a cancelled/refunded/
+  // long-since-completed order essentially never needs a click, so it shouldn't cost the same
+  // horizontal space as "New" or "Out for delivery". One click expands it back to a normal
+  // column for the rare time someone actually needs to look through it.
+  const [closedExpanded, setClosedExpanded] = useState(false);
+
+  // Scroll-arrow affordance for whatever horizontal scrolling the fluid column widths (see
+  // styles.css) don't fully eliminate — many columns, or a narrow window. Buttons only render
+  // when there's actually somewhere to scroll to, tracked via the container's own scroll
+  // position rather than assumed, so they never show as dead/no-op controls.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollButtons = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    updateScrollButtons();
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => updateScrollButtons();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    const ro = new ResizeObserver(updateScrollButtons);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      ro.disconnect();
+    };
+    // Re-check whenever the set of columns actually rendered changes (closed collapse/expand,
+    // or a different mode's board with a different column count) — the scrollable width itself
+    // just changed.
+  }, [columns.length, closedExpanded]);
+
+  const scrollByAmount = (dir: 1 | -1) => {
+    scrollRef.current?.scrollBy({ left: dir * 260, behavior: "smooth" });
+  };
+
   return (
     <div>
       {awaitingPaymentCount > 0 && (
@@ -165,27 +208,79 @@ export function FulfillmentBoard({
           <span className="admin-badge admin-badge-muted">{awaitingPaymentCount}</span>
         </div>
       )}
-      <div className="admin-board-columns">
-        {columns.map((col) => {
-          const items = byColumn.get(col.key) ?? [];
-          return (
-            <div key={col.key} className="admin-board-column">
-              <div className="admin-board-column-header">
-                <span>{col.label}</span>
-                <span className="admin-badge admin-badge-muted">{items.length}</span>
+      <div className="admin-board-columns-wrap">
+        {canScrollLeft && (
+          <button
+            type="button"
+            className="admin-board-scroll-btn admin-board-scroll-btn-left"
+            onClick={() => scrollByAmount(-1)}
+            aria-label="Scroll columns left"
+          >
+            <ChevronLeft size={16} />
+          </button>
+        )}
+        {canScrollRight && (
+          <button
+            type="button"
+            className="admin-board-scroll-btn admin-board-scroll-btn-right"
+            onClick={() => scrollByAmount(1)}
+            aria-label="Scroll columns right"
+          >
+            <ChevronRight size={16} />
+          </button>
+        )}
+        <div className="admin-board-columns" ref={scrollRef}>
+          {columns.map((col) => {
+            const items = byColumn.get(col.key) ?? [];
+            if (col.key === "closed" && !closedExpanded) {
+              return (
+                <div
+                  key={col.key}
+                  className="admin-board-column admin-board-column-collapsed"
+                  onClick={() => setClosedExpanded(true)}
+                  role="button"
+                  tabIndex={0}
+                  title="Show closed orders"
+                >
+                  <span className="admin-board-column-collapsed-label">
+                    {col.label}
+                    <span className="admin-badge admin-badge-muted">{items.length}</span>
+                  </span>
+                </div>
+              );
+            }
+            return (
+              <div key={col.key} className="admin-board-column">
+                <div className="admin-board-column-header">
+                  <span>{col.label}</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span className="admin-badge admin-badge-muted">{items.length}</span>
+                    {col.key === "closed" && (
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-ghost"
+                        style={{ fontSize: 10, padding: "1px 6px" }}
+                        onClick={() => setClosedExpanded(false)}
+                        title="Collapse back to a strip"
+                      >
+                        Collapse
+                      </button>
+                    )}
+                  </span>
+                </div>
+                <div className="admin-board-column-body">
+                  {items.length === 0 ? (
+                    <div style={{ fontSize: 12, color: "var(--admin-muted)", padding: "8px 2px" }}>Empty</div>
+                  ) : (
+                    items.map((o) => (
+                      <OrderCard key={o.id} order={o} mode={mode} onOpen={onOpenOrder} onOrderUpdated={onOrderUpdated} />
+                    ))
+                  )}
+                </div>
               </div>
-              <div className="admin-board-column-body">
-                {items.length === 0 ? (
-                  <div style={{ fontSize: 12, color: "var(--admin-muted)", padding: "8px 2px" }}>Empty</div>
-                ) : (
-                  items.map((o) => (
-                    <OrderCard key={o.id} order={o} mode={mode} onOpen={onOpenOrder} onOrderUpdated={onOrderUpdated} />
-                  ))
-                )}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

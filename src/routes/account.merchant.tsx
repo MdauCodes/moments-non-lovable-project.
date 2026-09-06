@@ -13,6 +13,7 @@ import {
   Settings as SettingsIcon,
   Award,
   FileText,
+  Landmark,
 } from "lucide-react";
 import { toast } from "sonner";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -20,6 +21,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { QuickAddProductStrip } from "@/components/QuickAddProductStrip";
 import { EmailVerificationCard } from "@/components/EmailVerificationCard";
 import { HowItWorksCard } from "@/components/HowItWorksCard";
+import { CreditReadinessCard } from "@/components/CreditReadinessCard";
 import { StatCard, StatCardGrid } from "@/components/dashboard/StatCard";
 import { type DashboardNavItem } from "@/components/dashboard/DashboardSidebarNav";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -31,6 +33,7 @@ import { profileStore, type CustomerProfile } from "@/services/profileStore";
 import { PrivacyDataSection } from "@/components/PrivacyDataSection";
 import { AccountSecuritySection } from "@/components/AccountSecuritySection";
 import { businessAccountApi, type CustomerTaxDocument } from "@/services/businessAccountApi";
+import { creditWorthinessApi, type CreditWorthinessInfo } from "@/services/creditWorthinessApi";
 import {
   referralStore,
   type ReferralStatus,
@@ -56,13 +59,14 @@ function AccountMerchantPage() {
 
 // ── Dashboard shell — same Stripe-style pattern as account.business.tsx ──────
 
-type TabKey = "overview" | "rewards" | "orders" | "documents" | "settings";
+type TabKey = "overview" | "rewards" | "orders" | "documents" | "creditWorthiness" | "settings";
 
 const NAV_ITEMS: DashboardNavItem<TabKey>[] = [
   { key: "overview", label: "Overview", icon: LayoutGrid },
   { key: "rewards", label: "Rewards & Referrals", icon: Award },
   { key: "orders", label: "Orders", icon: Package },
   { key: "documents", label: "Documents", icon: FileText },
+  { key: "creditWorthiness", label: "Credit Worthiness", icon: Landmark, soon: true },
   { key: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
@@ -168,6 +172,7 @@ function MerchantDashboardBody() {
       )}
       {tab === "orders" && <OrdersTab orders={orders} />}
       {tab === "documents" && <DocumentsTab />}
+      {tab === "creditWorthiness" && <CreditWorthinessTab />}
       {tab === "settings" && <SettingsTab />}
     </DashboardShell>
   );
@@ -540,6 +545,27 @@ function DocumentsTab() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Credit Worthiness tab ────────────────────────────────────────────────────
+
+function CreditWorthinessTab() {
+  const [info, setInfo] = useState<CreditWorthinessInfo | null>(null);
+
+  useEffect(() => {
+    creditWorthinessApi.getMine().then(setInfo).catch(() => setInfo({ enabled: false, readiness: null }));
+  }, []);
+
+  return (
+    <div className="space-y-5">
+      <HowItWorksCard icon={Landmark} title="Credit Worthiness — coming soon">
+        Once this opens up, your order history — including the readiness score below, if it's
+        showing yet — will be the starting point for what you're eligible for.
+      </HowItWorksCard>
+
+      {info?.enabled && info.readiness && <CreditReadinessCard readiness={info.readiness} />}
     </div>
   );
 }

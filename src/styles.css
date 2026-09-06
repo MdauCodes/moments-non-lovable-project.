@@ -745,15 +745,26 @@ html { font-size: 16px; }
 .admin-section-heading .admin-badge { text-transform: none; letter-spacing: 0; }
 
 /* Admin: per-fulfillment-mode kanban board (FulfillmentBoard) */
+.admin-board-columns-wrap {
+  position: relative;
+}
 .admin-board-columns {
   display: flex;
   gap: 10px;
   overflow-x: auto;
+  scroll-behavior: smooth;
   padding: 4px 4px 12px;
   align-items: flex-start;
 }
+/* Fluid, not fixed-width (was flex: 0 0 224px) — with 5-6 columns per mode plus the sidebar, a
+ * fixed per-column width routinely exceeded a normal laptop viewport, forcing a horizontal
+ * scroll just to see the later columns. Letting columns share whatever width is actually
+ * available (down to min-width) fits everything on-screen at typical desktop widths without
+ * scrolling at all; the scroll buttons below and overflow-x: auto above still cover the case
+ * where even the minimum widths don't fit (many columns, or a narrow window). */
 .admin-board-column {
-  flex: 0 0 224px;
+  flex: 1 1 0;
+  min-width: 190px;
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
   border-radius: 12px;
@@ -761,6 +772,48 @@ html { font-size: 16px; }
   flex-direction: column;
   max-height: calc(100vh - 220px);
 }
+/* Collapsed "Closed" column (FulfillmentBoard defaults it closed) — a slim vertical strip
+ * instead of a full column, since a closed/cancelled/refunded order essentially never needs a
+ * click. Reclaims the width for the columns staff actually act on; still one click to expand. */
+.admin-board-column-collapsed {
+  flex: 0 0 auto;
+  width: 40px;
+  min-width: 40px;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px 0;
+}
+.admin-board-column-collapsed:hover { border-color: var(--admin-accent); }
+.admin-board-column-collapsed-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.admin-board-scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface, #fff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.admin-board-scroll-btn:hover { border-color: var(--admin-accent); }
+.admin-board-scroll-btn-left { left: -4px; }
+.admin-board-scroll-btn-right { right: -4px; }
 .admin-board-column-header {
   display: flex;
   align-items: center;
@@ -810,5 +863,10 @@ html { font-size: 16px; }
   .admin-board-columns { flex-direction: column; overflow-x: visible; }
   .admin-board-column { flex-basis: auto; width: 100%; max-height: none; }
   .admin-board-column-body { max-height: 60vh; }
+  /* The vertical collapsed strip only makes sense in the desktop horizontal layout — stacked
+   * vertically it should just look like any other (collapsed-content) column. */
+  .admin-board-column-collapsed { width: 100%; min-width: 100%; padding: 0; flex-direction: row; }
+  .admin-board-column-collapsed-label { writing-mode: horizontal-tb; transform: none; padding: 10px; width: 100%; justify-content: space-between; }
+  .admin-board-scroll-btn { display: none; }
 }
 
