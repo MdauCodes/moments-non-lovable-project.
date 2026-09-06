@@ -15,6 +15,7 @@ import { PersonaProvider } from "@/contexts/PersonaContext";
 import { AdminProtectedRoute } from "@/components/admin/AdminProtectedRoute";
 import { SiteLockOverlay } from "@/components/SiteLockOverlay";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { PageViewTracker } from "@/components/PageViewTracker";
 import { ReferralCapture } from "@/components/ReferralCapture";
 
 // ── Public pages ────────────────────────────────────────────────────────────
@@ -159,6 +160,7 @@ export default function App() {
     <ErrorBoundary>
     <BrowserRouter>
       <ScrollToTop />
+      <PageViewTracker />
       <ReferralCapture />
       <SiteConfigProvider>
         <AccessibilityProvider>
