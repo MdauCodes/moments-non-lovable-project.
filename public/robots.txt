@@ -3,4 +3,40 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
+# Explicit allow for AI assistant/answer-engine crawlers — the wildcard rule above already
+# permits them, but some are documented as checking for their own named entry specifically
+# before trusting a wildcard, and this makes the intent unambiguous either way.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
 Sitemap: https://momentspackaging.com/sitemap.xml

@@ -7,6 +7,7 @@ import { TEMPLATE_META } from "@/data/blogs";
 import type { Blog, BlogTemplate } from "@/data/blogs";
 import { BLOGS_ENABLED } from "@/config/features";
 import { ArrowLeft } from "lucide-react";
+import { useSeo } from "@/hooks/useSeo";
 
 export default function BlogDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -25,6 +26,31 @@ export default function BlogDetailPage() {
       api.getRelatedBlogs(b.slug, 2).then(setRelated).catch(() => setRelated([]));
     });
   }, [slug, navigate]);
+
+  // Per-page SEO — previously every blog post inherited the homepage's title/description/OG
+  // tags. blog.seoTitle/seoDescription already exist as admin-editable fields (the CMS side of
+  // this was built), but nothing on the frontend ever actually applied them — this is that
+  // missing wiring. BlogPosting schema is the shape Google's rich results (and AI assistants
+  // summarizing an article) both parse for author/publish date.
+  useSeo({
+    title: blog ? `${blog.seoTitle || blog.title} — Moments Packaging Kenya` : "Loading… — Moments Packaging Kenya",
+    description: blog ? (blog.seoDescription || blog.excerpt) : "Loading article…",
+    path: `/blog/${slug ?? ""}`,
+    image: blog?.coverImage?.url,
+    jsonLd: blog
+      ? {
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          headline: blog.seoTitle || blog.title,
+          description: blog.seoDescription || blog.excerpt,
+          image: blog.coverImage?.url,
+          author: { "@type": "Organization", name: blog.author || "Moments Packaging Kenya" },
+          datePublished: blog.publishedAt ?? undefined,
+          dateModified: blog.updatedAt ?? undefined,
+          mainEntityOfPage: `https://momentspackaging.com/blog/${slug ?? ""}`,
+        }
+      : undefined,
+  });
 
   if (loading || !blog) {
     return (

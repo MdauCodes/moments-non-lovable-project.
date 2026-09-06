@@ -19,6 +19,7 @@ import { reviewStore } from "@/services/reviewStore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { sanitizeProductDescription } from "@/lib/utils";
 import { individualUnitLabel } from "@/lib/uomLabel";
+import { useSeo } from "@/hooks/useSeo";
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -201,6 +202,45 @@ export default function ProductDetail() {
       toast.success("Link copied");
     }
   };
+
+  // Per-page SEO — previously every product page silently inherited the homepage's title/
+  // description/OG tags (see useSeo's own Javadoc-style comment for why), meaning neither search
+  // engines nor an AI assistant's own fetcher could tell one product page from another, or from
+  // the homepage. Product schema (with an Offer) is the same structured-data shape Google's rich
+  // results and AI shopping assistants both parse for price/availability.
+  const seoDescription = product
+    ? sanitizeProductDescription(product.description).slice(0, 155) ||
+      `${product.name} — custom packaging from Moments Packaging Kenya. Order online, pay with M-Pesa, nationwide delivery.`
+    : "Loading product…";
+  const seoImage = product?.primaryImageUrl ?? product?.image;
+  useSeo({
+    title: product ? `${product.name} — Moments Packaging Kenya` : "Loading product… — Moments Packaging Kenya",
+    description: seoDescription,
+    path: `/products/${slug ?? ""}`,
+    image: seoImage,
+    jsonLd: product
+      ? {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: product.name,
+          description: seoDescription,
+          image: seoImage,
+          sku: product.sku,
+          category: product.categoryName ?? product.category,
+          brand: { "@type": "Brand", name: "Moments Packaging Kenya" },
+          offers: {
+            "@type": "Offer",
+            url: `https://momentspackaging.com/products/${slug ?? ""}`,
+            priceCurrency: "KES",
+            price: product.basePrice ?? undefined,
+            availability:
+              product.stockStatus === "OUT_OF_STOCK"
+                ? "https://schema.org/OutOfStock"
+                : "https://schema.org/InStock",
+          },
+        }
+      : undefined,
+  });
 
   // ── early return AFTER all hooks ─────────────────────────────────────────
   if (loading || !product) return <SiteLayout><ProductDetailSkeleton /></SiteLayout>;

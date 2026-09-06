@@ -2,6 +2,7 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { COMPANY_EMAIL, COMPANY_PHONE, COMPANY_PHONE_ALT, whatsappLink } from "@/data/products";
 import { MessageCircle, Mail } from "lucide-react";
+import { useSeo } from "@/hooks/useSeo";
 
 /**
  * DRAFT CONTENT — needs admin sign-off before shipping.
@@ -83,6 +84,26 @@ const FAQ_GROUPS: FaqGroup[] = [
 ];
 
 function FaqPage() {
+  // FAQPage schema is exactly what Google's FAQ rich results and AI answer engines both parse
+  // to quote a specific answer directly, rather than needing to guess at page structure — this
+  // flattens FAQ_GROUPS (already a clean, structured Q&A list) straight into it.
+  useSeo({
+    title: "Frequently Asked Questions — Moments Packaging Kenya",
+    description: "Answers on ordering, payment (M-Pesa), delivery times, and returns for Moments Packaging Kenya's custom paper packaging.",
+    path: "/faq",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: FAQ_GROUPS.flatMap((group) =>
+        group.items.map((item) => ({
+          "@type": "Question",
+          name: item.q,
+          acceptedAnswer: { "@type": "Answer", text: item.a },
+        })),
+      ),
+    },
+  });
+
   return (
     <SiteLayout>
       <section className="bg-cream">
