@@ -1377,10 +1377,10 @@ function CheckoutModal() {
               </button>
 
               <div>
-                <h2 className="font-display text-2xl text-foreground">Confirm What You're Ordering</h2>
+                <h2 className="font-display text-2xl text-foreground">Get Your Order Right</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Double-check the size on each item before we prepare your order — this is the
-                  easiest place to catch a mistake, before it's packed.
+                  Confirm the size, colour, or model for each item below — this is your last
+                  chance to get it right before we pack your order.
                 </p>
               </div>
 
@@ -1413,13 +1413,13 @@ function CheckoutModal() {
 
                     <div className="mt-3">
                       <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Colour / style preference <span className="font-normal normal-case">(optional)</span>
+                        Specific colour, size, or model you want? <span className="font-normal normal-case">(optional)</span>
                       </label>
                       <input
                         type="text"
                         value={itemNotes[noteKeyFor(it)] ?? ""}
                         onChange={(e) => updateItemNote(noteKeyFor(it), e.target.value)}
-                        placeholder="e.g. Khaki, or &quot;No. 14&quot; model"
+                        placeholder="e.g. khaki, or &quot;No. 14&quot; model"
                         maxLength={200}
                         className={inputCls}
                       />
