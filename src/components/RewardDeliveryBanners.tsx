@@ -66,7 +66,12 @@ export function RewardDeliveryBanners({ topOffsetClassName = "top-16 sm:top-20" 
       candidates.push({ amount: kesToNextTier, benefit: `unlock ${nextTierName} — ${nextTierDiscountPercent}% off every order` });
     }
     if (kesToFreeDelivery != null && freeDeliveryZoneLabel != null) {
-      candidates.push({ amount: kesToFreeDelivery, benefit: `get free delivery to ${freeDeliveryZoneLabel}` });
+      // Scoped to "hand-delivery" specifically, not a blanket "delivery" claim — the threshold
+      // is only ever honoured for MANUAL_DELIVERY + HAND_DELIVERY within the zone (see
+      // CheckoutService). A customer who picks TumaBoda instead pays full price regardless of
+      // cart total; a generic "free delivery" promise would be false for that (very common,
+      // prominently-branded) fulfillment choice.
+      candidates.push({ amount: kesToFreeDelivery, benefit: `get free hand-delivery within ${freeDeliveryZoneLabel}` });
     }
     if (candidates.length === 0) return null;
     return candidates.sort((a, b) => a.amount - b.amount)[0];
