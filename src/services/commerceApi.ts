@@ -667,6 +667,28 @@ export async function fetchStuckPayments(): Promise<StuckPayment[]> {
   return getJson<StuckPayment[]>("/api/v1/admin/orders/stuck-payments");
 }
 
+/** A payment that actually succeeded — see PaymentService.getSuccessfulPayments and
+ *  SuccessfulPaymentDto on the backend. Distinct from StuckPayment above, which is only
+ *  attempts still stuck in INITIATED/PROCESSING. */
+export interface SuccessfulPayment {
+  paymentRecordId: string;
+  orderId: string;
+  orderReference: string;
+  contactName: string;
+  phone: string;
+  amount: number;
+  method: string | null;
+  receiptNumber: string | null;
+  createdAt: string;
+  fulfillmentType: string | null;
+  isTestOrder: boolean;
+}
+
+export async function listSuccessfulPayments(page = 0, size = 25): Promise<{ rows: SuccessfulPayment[]; total: number; totalPages: number }> {
+  const data = await getJson<any>(`/api/v1/admin/orders/payments/successful?${qs({ page, size })}`);
+  return unwrapPage<SuccessfulPayment>(data);
+}
+
 
 // ---------- Dashboard ----------
 
