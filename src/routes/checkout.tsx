@@ -129,12 +129,22 @@ async function uploadTaxInvoicePdf(order: CustomerOrder, uploadToken: string, bu
  *  payment-related), without requiring an account. */
 const GUEST_CHECKOUT_KEY = "mpk_guest_checkout_details_v1";
 
-/** One JSON object, product id -> the customer's last-typed preference note for that product
- *  (e.g. "Khaki, size 14" for a product whose real colour/model options aren't yet structured
- *  attributes — see the Confirm step). Read on entering the Confirm step to prefill a returning
- *  customer's note for the same product; written on every edit, not just on Continue, so a
- *  half-typed note surviving an accidental tab close is a nice side effect, not the point. */
+/** One JSON object, note key -> the customer's last-typed preference note (e.g. "Khaki, size 14"
+ *  for a product whose real colour/model options aren't yet structured attributes — see the
+ *  Confirm step). Read on entering the Confirm step to prefill a returning customer's note for
+ *  the same product+size+tier combination; written on every edit, not just on Continue, so a
+ *  half-typed note surviving an accidental tab close is a nice side effect, not the point.
+ *
+ *  Keyed by product+size+tier, NOT bare productId: a cart can hold two lines of the same product
+ *  in different sizes (e.g. a Gift Box in both Small and Large — CartContext.addItem creates
+ *  genuinely separate lines for these), and a bare-productId key would have one line's input
+ *  silently overwrite the other's, with both order lines then receiving whichever note was typed
+ *  last. */
 const ITEM_VARIANT_NOTES_KEY = "mpk_item_variant_notes_v1";
+
+function noteKeyFor(item: { productId: string; size?: string | null; tierId?: string | null }): string {
+  return `${item.productId}|${item.size ?? ""}|${item.tierId ?? ""}`;
+}
 
 function loadSavedItemNotes(): Record<string, string> {
   try {
@@ -242,9 +252,9 @@ function CheckoutModal() {
   // returning customer's note for a product they've bought before is already there.
   const [itemNotes, setItemNotes] = useState<Record<string, string>>(() => loadSavedItemNotes());
 
-  function updateItemNote(productId: string, note: string) {
+  function updateItemNote(noteKey: string, note: string) {
     setItemNotes((prev) => {
-      const next = { ...prev, [productId]: note };
+      const next = { ...prev, [noteKey]: note };
       try {
         localStorage.setItem(ITEM_VARIANT_NOTES_KEY, JSON.stringify(next));
       } catch {
@@ -1043,9 +1053,11 @@ function CheckoutModal() {
 
       if (!id) {
         const { order } = await orderStore.placeOrder({
-          // Merges each line's Confirm-items-step note in by productId — itemNotes is
+          // Merges each line's Confirm-items-step note in by the same product+size+tier key
+          // used to render it (see noteKeyFor) — a bare productId key would collide when the
+          // cart holds two lines of the same product in different sizes. itemNotes is
           // checkout-local state (see its own declaration), never part of the cart itself.
-          items: items.map((it) => ({ ...it, variantNote: itemNotes[it.productId] || undefined })),
+          items: items.map((it) => ({ ...it, variantNote: itemNotes[noteKeyFor(it)] || undefined })),
           customer: {
             name: name.trim(),
             email: email.trim(),
@@ -1276,11 +1288,14 @@ function CheckoutModal() {
       {/* Step indicator */}
       <div className="border-b border-border bg-card/50">
         <div className="mx-auto flex max-w-2xl items-center justify-center gap-3 px-4 py-3 text-xs sm:text-sm">
-          <StepDot active={step === "contact"} done={step !== "contact"} label="1. Contact" />
+          {/* shortLabel on mobile — three full labels ("3. Delivery & payment" is the long one)
+              overflow a 375px-wide bar; HANDOFF.md already documents this exact regression once
+              before, when the indicator briefly went from 2 steps to 3. */}
+          <StepDot active={step === "contact"} done={step !== "contact"} label="1. Contact" shortLabel="Contact" />
           <span className="h-px w-6 bg-border sm:w-16" />
-          <StepDot active={step === "confirm"} done={step === "delivery"} label="2. Confirm items" />
+          <StepDot active={step === "confirm"} done={step === "delivery"} label="2. Confirm items" shortLabel="Items" />
           <span className="h-px w-6 bg-border sm:w-16" />
-          <StepDot active={step === "delivery"} done={false} label="3. Delivery & payment" />
+          <StepDot active={step === "delivery"} done={false} label="3. Delivery & payment" shortLabel="Delivery" />
         </div>
       </div>
 
@@ -1402,8 +1417,8 @@ function CheckoutModal() {
                       </label>
                       <input
                         type="text"
-                        value={itemNotes[it.productId] ?? ""}
-                        onChange={(e) => updateItemNote(it.productId, e.target.value)}
+                        value={itemNotes[noteKeyFor(it)] ?? ""}
+                        onChange={(e) => updateItemNote(noteKeyFor(it), e.target.value)}
                         placeholder="e.g. Khaki, or &quot;No. 14&quot; model"
                         maxLength={200}
                         className={inputCls}
