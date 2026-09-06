@@ -230,6 +230,27 @@ export type CheckoutFunnelSession = {
   fulfillmentType?: string;
 };
 
+export type PathCount = { path: string; count: number };
+
+export type PathTransition = { fromPath: string; toPath: string; count: number };
+
+export type PageJourneySummary = {
+  days: number;
+  totalSessions: number;
+  totalPageViews: number;
+  topEntryPages: PathCount[];
+  topExitPages: PathCount[];
+  topPages: PathCount[];
+};
+
+export type PageJourneySession = {
+  sessionId: string;
+  path: string[];
+  firstSeenAt: string;
+  lastSeenAt: string;
+  pageViews: number;
+};
+
 export type MockModeState = { enabled: boolean; message?: string };
 
 export type UserDto = {
@@ -561,6 +582,14 @@ export const adminResources = {
       adminJson<CheckoutFunnelSummary>(`/api/v1/admin/checkout-funnel/summary?days=${days}`),
     droppedSessions: (days: number, limit = 200) =>
       adminJson<CheckoutFunnelSession[]>(`/api/v1/admin/checkout-funnel/dropped-sessions?days=${days}&limit=${limit}`),
+  },
+  pageJourney: {
+    summary: (days: number) =>
+      adminJson<PageJourneySummary>(`/api/v1/admin/page-journey/summary?days=${days}`),
+    transitions: (days: number, limit = 20) =>
+      adminJson<PathTransition[]>(`/api/v1/admin/page-journey/transitions?days=${days}&limit=${limit}`),
+    sessions: (days: number, limit = 200) =>
+      adminJson<PageJourneySession[]>(`/api/v1/admin/page-journey/sessions?days=${days}&limit=${limit}`),
   },
   promoCodes: {
     list: () => adminJson<PromoCodeDto[]>("/api/v1/admin/promo-codes"),

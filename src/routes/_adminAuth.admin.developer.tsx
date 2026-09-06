@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { Wrench, ScrollText, TrendingDown } from "lucide-react";
+import { Wrench, ScrollText, TrendingDown, Route as RouteIcon } from "lucide-react";
 import { AdminLayout } from "@/layouts/AdminLayout";
 import { Forbidden } from "@/components/admin/Forbidden";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
@@ -7,13 +7,15 @@ import { resolveStaffRole } from "@/lib/roles";
 import { DevToolsPanel } from "./_adminAuth.admin.dev-tools";
 import { DevLogsPanel } from "./_adminAuth.admin.dev-logs";
 import { CheckoutFunnelPanel } from "./_adminAuth.admin.developer.checkout-funnel";
+import { PageJourneysPanel } from "./_adminAuth.admin.developer.page-journeys";
 
-type Tab = "tools" | "logs" | "funnel";
+type Tab = "tools" | "logs" | "funnel" | "journeys";
 
 const TABS: { key: Tab; label: string; icon: typeof Wrench }[] = [
   { key: "tools", label: "Developer Tools", icon: Wrench },
   { key: "logs", label: "Dev Logs", icon: ScrollText },
   { key: "funnel", label: "Checkout Funnel", icon: TrendingDown },
+  { key: "journeys", label: "User Journeys", icon: RouteIcon },
 ];
 
 /** Single consolidated super-admin-only "Developer" section, replacing the previously separate
@@ -51,6 +53,7 @@ function AdminDeveloperPage() {
         {activeTab === "tools" && <DevToolsPanel />}
         {activeTab === "logs" && <DevLogsPanel />}
         {activeTab === "funnel" && <CheckoutFunnelPanel />}
+        {activeTab === "journeys" && <PageJourneysPanel />}
       </div>
     </AdminLayout>
   );
