@@ -206,6 +206,10 @@ export interface CustomerRecord {
   /** Count of accounts that signed up using this customer's referral code — strategic data
    *  (who's driving word-of-mouth growth), separate from rewardsPoints (their own balance). */
   referralCount?: number | null;
+  /** Of referralCount, how many actually placed a qualifying order — so a customer whose own
+   *  orders have gone quiet but whose referrals are converting doesn't just read as flatly
+   *  DORMANT in the list view, where there's no room to expand into the full referral history. */
+  referralsConverted?: number;
 }
 
 export interface ReferredCustomer {

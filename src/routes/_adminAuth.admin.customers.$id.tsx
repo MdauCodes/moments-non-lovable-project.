@@ -15,9 +15,10 @@ import {
 import { getCustomer, impersonateCustomer, setCustomerTestAccount } from "@/services/commerceApi";
 import type { CustomerRecord, OrderRecord, ReferredCustomer } from "@/services/commerceMock";
 import { downloadCustomerStatementPdf } from "@/lib/pdf";
-import { FileText } from "lucide-react";
+import { FileText, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AdminAuthContext";
 import { resolveStaffRole } from "@/lib/roles";
+import { adminResources, type BusinessAccountDto } from "@/services/adminResources";
 
 
 
@@ -33,6 +34,8 @@ function AdminCustomerDetailPage() {
   const [previewing, setPreviewing] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [savingTestAccount, setSavingTestAccount] = useState(false);
+  const [businessAccount, setBusinessAccount] = useState<BusinessAccountDto | null>(null);
+  const [savingCreditApproval, setSavingCreditApproval] = useState(false);
   // Opened synchronously in the click handler, before the (async) impersonateCustomer call —
   // window.open() after an await is silently blocked by most browsers' popup blockers since it's
   // no longer treated as a direct response to the click.
@@ -96,6 +99,31 @@ function AdminCustomerDetailPage() {
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [id, reloadKey]);
+
+  // Business Accounts only — the readiness score + credit-approval controls below need the
+  // BusinessAccount row itself, not just the generic customer record.
+  useEffect(() => {
+    if (!id || customer?.accountType !== "BUSINESS") { setBusinessAccount(null); return; }
+    let cancelled = false;
+    adminResources.businessAccounts.getByUserId(id)
+      .then((ba) => { if (!cancelled) setBusinessAccount(ba); })
+      .catch((err) => reportAdminError(err, "Failed to load business account"));
+    return () => { cancelled = true; };
+  }, [id, customer?.accountType, reloadKey]);
+
+  async function decideCreditApproval(status: "APPROVED" | "REJECTED") {
+    if (!businessAccount) return;
+    setSavingCreditApproval(true);
+    try {
+      const updated = await adminResources.businessAccounts.setCreditApproval(businessAccount.id, status);
+      setBusinessAccount(updated);
+      toast.success(status === "APPROVED" ? "Trade profile approved" : "Trade profile rejected");
+    } catch (err) {
+      reportAdminError(err, "Couldn't record the decision");
+    } finally {
+      setSavingCreditApproval(false);
+    }
+  }
 
   if (loading) {
     return <AdminLayout title="Customer"><div className="admin-empty">Loading customer…</div></AdminLayout>;
@@ -214,6 +242,60 @@ function AdminCustomerDetailPage() {
                 </div>
               )}
             </div>
+
+            {businessAccount && (
+              <div className="admin-panel" style={{ padding: 18 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                  <div className="admin-label">Credit worthiness</div>
+                  <span
+                    style={{
+                      display: "inline-flex", padding: "2px 8px", borderRadius: 999, fontSize: 10, fontWeight: 700,
+                      background: businessAccount.creditApprovalStatus === "APPROVED" ? "rgba(34, 197, 94, 0.15)"
+                        : businessAccount.creditApprovalStatus === "REJECTED" ? "rgba(107, 114, 128, 0.18)" : "rgba(234, 179, 8, 0.18)",
+                      color: businessAccount.creditApprovalStatus === "APPROVED" ? "#15803d"
+                        : businessAccount.creditApprovalStatus === "REJECTED" ? "#374151" : "#a16207",
+                    }}
+                  >
+                    {businessAccount.creditApprovalStatus}
+                  </span>
+                </div>
+                {businessAccount.creditReadiness && (
+                  <>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: 30, marginTop: 4 }}>
+                      {businessAccount.creditReadiness.score}
+                      <span style={{ fontSize: 13, color: "var(--admin-muted)", fontFamily: "inherit" }}> / 100 · {businessAccount.creditReadiness.label}</span>
+                    </div>
+                    <div style={{ color: "var(--admin-muted)", fontSize: 12, marginTop: 4 }}>
+                      {businessAccount.orderCount ?? 0} order{businessAccount.orderCount === 1 ? "" : "s"} · {formatKes(businessAccount.totalSpend ?? 0)} lifetime spend
+                    </div>
+                  </>
+                )}
+                {businessAccount.creditApprovalDecidedAt && (
+                  <div style={{ color: "var(--admin-muted)", fontSize: 11, marginTop: 8 }}>
+                    Decided by {businessAccount.creditApprovalDecidedBy ?? "—"} on {formatDateShort(businessAccount.creditApprovalDecidedAt)}
+                  </div>
+                )}
+                <p style={{ marginTop: 10, fontSize: 11.5, color: "var(--admin-muted)", lineHeight: 1.5 }}>
+                  Recorded for later — real trade-credit terms aren't live yet, this doesn't change what the business can do today.
+                </p>
+                <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                  <button
+                    type="button" className="admin-btn admin-btn-primary"
+                    disabled={savingCreditApproval || businessAccount.creditApprovalStatus === "APPROVED"}
+                    onClick={() => void decideCreditApproval("APPROVED")}
+                  >
+                    <ShieldCheck size={14} style={{ marginRight: 6 }} />Approve
+                  </button>
+                  <button
+                    type="button" className="admin-btn admin-btn-ghost"
+                    disabled={savingCreditApproval || businessAccount.creditApprovalStatus === "REJECTED"}
+                    onClick={() => void decideCreditApproval("REJECTED")}
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="admin-panel" style={{ padding: 18 }}>
               <div className="admin-label">Contact</div>
