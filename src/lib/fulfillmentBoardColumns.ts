@@ -78,7 +78,15 @@ export const BOARD_COLUMNS: Record<FulfillmentModeKey, BoardColumn[]> = {
  *  display grouping. Reads completedAt (Order.completedAt, stamped once — see its backend
  *  Javadoc), so it can't be tricked by unrelated background saves the way updatedAt could.
  */
-const AUTO_CLOSE_COMPLETED_AFTER_MS = 60 * 60 * 1000; // 1 hour
+export const AUTO_CLOSE_COMPLETED_AFTER_MS = 60 * 60 * 1000; // 1 hour
+
+/** True once an order's completedAt is old enough that "Completed" should reclassify it into
+ *  "Closed" — shared by resolveBoardColumnKey below and allOrdersBoardColumns.ts's own resolver,
+ *  so the two boards (per-mode vs. the mixed "All Orders" view) can't drift on the cutoff. */
+export function isCompletedOldEnoughToClose(completedAt: string | null | undefined): boolean {
+  if (!completedAt) return false;
+  return Date.now() - new Date(completedAt).getTime() >= AUTO_CLOSE_COMPLETED_AFTER_MS;
+}
 
 /** Which column an order belongs to on its mode's board, or null if it's PENDING_PAYMENT
  *  (not shown as a column — see the board's own "awaiting payment" counter instead) or in a
@@ -92,9 +100,8 @@ export function resolveBoardColumnKey(
   const columns = BOARD_COLUMNS[mode];
   for (const col of columns) {
     if (col.matches.includes(current)) {
-      if (col.key === "completed" && order.completedAt) {
-        const age = Date.now() - new Date(order.completedAt).getTime();
-        if (age >= AUTO_CLOSE_COMPLETED_AFTER_MS) return "closed";
+      if (col.key === "completed" && isCompletedOldEnoughToClose(order.completedAt)) {
+        return "closed";
       }
       return col.key;
     }

@@ -8,6 +8,7 @@
 // a column.
 // ----------------------------------------------------------------------------
 import type { OrderRecord } from "@/services/commerceMock";
+import { isCompletedOldEnoughToClose } from "@/lib/fulfillmentBoardColumns";
 
 export interface AllOrdersBoardColumn {
   key: string;
@@ -24,13 +25,40 @@ export const ALL_ORDERS_BOARD_COLUMNS: AllOrdersBoardColumn[] = [
   { key: "closed", label: "Closed", matches: ["CANCELLED", "REFUNDED"] },
 ];
 
+/** statusV2 values that mean an order is effectively done even though the legacy Order.status
+ *  it's otherwise grouped by hasn't caught up to DELIVERED yet — currently just TumaBoda's
+ *  DELIVERED_PENDING_CONFIRMATION (see fulfillmentBoardColumns.ts's own reclassification of the
+ *  same value): TumaBoda's webhook already reported the parcel delivered, and legacy status only
+ *  advances to DELIVERED once the CUSTOMER separately confirms via their own OTP, which they may
+ *  never do. Without this override, this board disagreed with the per-mode TumaBoda board — the
+ *  same order showed "Completed" there and "Out for delivery" here, confusing enough on its own
+ *  to be a bug report. Checked before the legacy-status matching below, not merged into it,
+ *  since every other bucket here is genuinely legacy-status-only. */
+const STATUS_V2_MEANS_COMPLETED_DESPITE_LEGACY_STATUS = new Set(["DELIVERED_PENDING_CONFIRMATION"]);
+
 /** Which column an order belongs to, or null for PENDING_PAYMENT (surfaced as its own "awaiting
- *  payment" counter above the board, same pattern as every per-mode board already uses). */
-export function resolveAllOrdersColumnKey(order: { status?: string | null }): string | null {
+ *  payment" counter above the board, same pattern as every per-mode board already uses). Also
+ *  reclassifies a completed order into "closed" once it's been done for over an hour — same
+ *  cutoff and same reasoning as the per-mode boards (fulfillmentBoardColumns.ts's
+ *  AUTO_CLOSE_COMPLETED_AFTER_MS): there's no reason for a finished order to keep occupying
+ *  "Completed" indefinitely, and CANCELLED/REFUNDED orders already share "Closed" with nothing
+ *  further needed from staff either. */
+export function resolveAllOrdersColumnKey(order: {
+  status?: string | null;
+  statusV2?: string | null;
+  completedAt?: string | null;
+}): string | null {
   const status = order.status;
   if (!status || status === "PENDING_PAYMENT") return null;
-  const col = ALL_ORDERS_BOARD_COLUMNS.find((c) => c.matches.includes(status));
-  return col ? col.key : null;
+
+  const key = order.statusV2 && STATUS_V2_MEANS_COMPLETED_DESPITE_LEGACY_STATUS.has(order.statusV2)
+    ? "completed"
+    : ALL_ORDERS_BOARD_COLUMNS.find((c) => c.matches.includes(status))?.key ?? null;
+
+  if (key === "completed" && isCompletedOldEnoughToClose(order.completedAt)) {
+    return "closed";
+  }
+  return key;
 }
 
 /** Short label for the fulfillment-type badge every card needs here (and only here — a

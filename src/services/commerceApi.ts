@@ -115,6 +115,11 @@ function normalizeOrder(raw: any): OrderRecord {
 
     createdAt: raw?.createdAt ?? new Date().toISOString(),
     updatedAt: raw?.updatedAt ?? raw?.createdAt ?? new Date().toISOString(),
+    // Was missing entirely (bug found 2026-09-06): every board's "reclassify Completed into
+    // Closed after an hour" logic reads this field — without it mapped here, it was always
+    // undefined on the frontend regardless of what the backend actually sent, so nothing ever
+    // auto-closed. See Order.completedAt's backend Javadoc.
+    completedAt: raw?.completedAt ?? null,
 
     tumabodaTrackingCode: raw?.tumabodaTrackingCode,
     notes: raw?.notes,
@@ -151,6 +156,8 @@ function normalizeOrder(raw: any): OrderRecord {
     tumabodaPickupOtpExpiresAt: raw?.tumabodaPickupOtpExpiresAt ?? null,
     tumabodaPickupOtpVerifiedAt: raw?.tumabodaPickupOtpVerifiedAt ?? null,
     tumabodaBookingFailureReason: raw?.tumabodaBookingFailureReason ?? null,
+    tumabodaDeliveryAttempts: raw?.tumabodaDeliveryAttempts ?? null,
+    tumabodaAutoRetryExhausted: raw?.tumabodaAutoRetryExhausted ?? null,
     tumabodaContactPhone: raw?.tumabodaContactPhone ?? null,
     customerConfirmedDeliveredAt: raw?.customerConfirmedDeliveredAt,
     deliveryVerificationCode: raw?.deliveryVerificationCode ?? null,
