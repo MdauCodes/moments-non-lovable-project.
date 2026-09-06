@@ -34,11 +34,15 @@ function AnimatedNumber({ value }: { value: number }) {
  * Renders nothing when there's nothing to say — callers should reserve layout space for it
  * (see REWARD_BANNER_SPACER_CLASS) so content doesn't jump when it appears.
  *
- * `topOffsetClassName` lets a caller override where the bar sits — the default matches the site
- * header; checkout renders as its own full-screen overlay with different chrome above it, so it
- * passes its own offset instead.
+ * `topOffsetClassName` lets a caller override where the bar sits — checkout renders as its own
+ * full-screen overlay with different chrome above it, so it passes its own fixed offset instead.
+ * Left unset (every other caller, all of them under SiteLayout), it docks to SiteHeader's real,
+ * currently-rendered bottom edge via `--site-header-bottom` (see SiteHeader.tsx) rather than a
+ * guessed pixel offset — a hardcoded guess broke the moment anything else (CelebratoryRewardBanner,
+ * the pre-launch banner) added height above the header, since this bar had no way to know that
+ * height had grown and ended up overlapping the header instead of sitting below it.
  */
-export function RewardDeliveryBanners({ topOffsetClassName = "top-16 sm:top-20" }: { topOffsetClassName?: string }) {
+export function RewardDeliveryBanners({ topOffsetClassName }: { topOffsetClassName?: string }) {
   const { isAuthenticated } = useAuth();
   const { openLogin } = useAuthModal();
   const {
@@ -136,9 +140,10 @@ export function RewardDeliveryBanners({ topOffsetClassName = "top-16 sm:top-20" 
 
   return (
     <div
-      className={`fixed inset-x-0 z-40 px-3 py-2.5 text-xs font-semibold sm:text-sm ${topOffsetClassName} ${
+      className={`fixed inset-x-0 z-40 px-3 py-2 text-xs font-semibold sm:text-sm ${topOffsetClassName ?? ""} ${
         tone === "success" ? "bg-emerald-600 text-white" : "bg-accent text-accent-foreground"
       }`}
+      style={topOffsetClassName ? undefined : { top: "var(--site-header-bottom, 4.5rem)" }}
     >
       {content}
     </div>
@@ -149,4 +154,4 @@ export function RewardDeliveryBanners({ topOffsetClassName = "top-16 sm:top-20" 
  *  doesn't cover the content immediately below it. Taller on mobile since the full (no longer
  *  truncated) message can wrap to two lines on a narrow screen; a single line comfortably fits
  *  from sm: up. */
-export const REWARD_BANNER_SPACER_CLASS = "h-14 sm:h-10";
+export const REWARD_BANNER_SPACER_CLASS = "h-12 sm:h-9";
