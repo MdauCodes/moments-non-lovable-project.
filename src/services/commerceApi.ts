@@ -74,6 +74,9 @@ function normalizeOrder(raw: any): OrderRecord {
     size: it.size,
     material: it.material,
     finish: it.finish,
+    // Optional colour/style note from the checkout Confirm-items step — see
+    // OrderItemDto.variantNote server-side.
+    variantNote: it.variantNote,
     lineTotal: num(it.lineTotal ?? num(it.unitPrice) * num(it.quantity ?? it.qty)),
   }));
 
@@ -256,15 +259,16 @@ export async function createOrder(params: CreateOrderParams): Promise<{ order: O
 }
 
 // Backend PATCH /api/v1/admin/orders/{id}/status
-// Body: { status: OrderStatus, staffNotes?: string }
+// Body: { status: OrderStatus, staffNotes?: string, receiptReference?: string }
 export async function updateOrderStatus(
   id: string,
   status: OrderStatus,
   staffNotes?: string,
+  receiptReference?: string,
 ): Promise<{ order: OrderRecord | undefined; source: Source }> {
   const res = await adminFetch(`/api/v1/admin/orders/${encodeURIComponent(id)}/status`, {
     method: "PATCH",
-    body: JSON.stringify({ status, staffNotes }),
+    body: JSON.stringify({ status, staffNotes, receiptReference }),
   });
   if (!res.ok) throw new ApiError({ status: res.status, message: res.statusText });
   const raw = await res.json();

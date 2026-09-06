@@ -5,11 +5,13 @@ import { passwordStore } from "@/services/passwordStore";
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
- * Shown in both the Individual Shopper and Business account dashboards. Email
- * verification is never required to sign up or shop — only to keep
- * redeeming points past the free allowance (see backend
- * ReferralService.FREE_REDEMPTION_LIMIT). This card makes the capability
- * visible from day one even before it's ever enforced.
+ * Shown in both the Individual Shopper and Business account dashboards. Every account is now
+ * verified before it can log in at all (see AuthService.login's emailVerified gate and
+ * RegistrationDetailsWizard's mandatory OTP step at signup) — this card should never actually
+ * render its unverified state for a normal customer reaching their dashboard. It stays as a
+ * defensive fallback for edge cases (e.g. an account created before this gate existed) and still
+ * doubles as the place redeeming-points messaging lives (see backend
+ * ReferralService.FREE_REDEMPTION_LIMIT).
  */
 export function EmailVerificationCard({
   email,

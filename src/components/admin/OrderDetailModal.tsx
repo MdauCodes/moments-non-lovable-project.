@@ -31,6 +31,7 @@ import { useAuth } from "@/contexts/AdminAuthContext";
 import { PERM } from "@/lib/permissions";
 import { resolveStaffRole, STAFF_ROLE_RANK } from "@/lib/roles";
 import { AssignSelect } from "@/components/admin/AssignSelect";
+import { MarkPaidModal } from "@/components/admin/MarkPaidModal";
 
 interface Props {
   orderId: string | null;
@@ -65,6 +66,7 @@ export function OrderDetailModal({ orderId, onClose, onChanged }: Props) {
   const [savingNotes, setSavingNotes] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | "">("");
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [showMarkPaidModal, setShowMarkPaidModal] = useState(false);
   const { user, hasPermission } = useAuth();
   const canAssign = hasPermission(PERM.ORDER_ASSIGN) || hasPermission(PERM.ORDER_MANAGE_ALL);
   const canOverrideStatus = hasPermission(PERM.ORDER_MANAGE_ALL);
@@ -212,15 +214,16 @@ export function OrderDetailModal({ orderId, onClose, onChanged }: Props) {
     }
   };
 
-  const handleStatusUpdate = async () => {
+  const handleStatusUpdate = async (receiptReference?: string) => {
     if (!o || !selectedStatus || selectedStatus === o.status) return;
     setUpdatingStatus(true);
     try {
-      const res = await updateOrderStatus(o.id, selectedStatus as OrderStatus, staffNotes || undefined);
+      const res = await updateOrderStatus(o.id, selectedStatus as OrderStatus, staffNotes || undefined, receiptReference);
       if (res.order) {
         handleOrderUpdated(res.order);
         toast.success(`Status updated to ${statusLabel(selectedStatus)}`);
       }
+      setShowMarkPaidModal(false);
     } catch (err) {
       reportAdminError(err, "Failed to update status");
     } finally {
@@ -264,6 +267,7 @@ export function OrderDetailModal({ orderId, onClose, onChanged }: Props) {
   };
 
   return (
+    <>
     <Dialog
       open={!!orderId}
       onOpenChange={(v) => {
@@ -361,6 +365,11 @@ export function OrderDetailModal({ orderId, onClose, onChanged }: Props) {
                           <td className="py-2 pr-3 text-muted-foreground">{it.category ?? "—"}</td>
                           <td className="py-2 pr-3 text-muted-foreground text-xs">
                             {[it.size, it.material, it.finish].filter(Boolean).join(" · ") || "—"}
+                            {it.variantNote && (
+                              <div className="mt-1 rounded bg-amber-50 px-1.5 py-1 italic text-amber-800">
+                                "{it.variantNote}"
+                              </div>
+                            )}
                           </td>
                           <td className="py-2 pr-3 text-right">{Number(it.qty ?? 0)}</td>
                           <td className="py-2 pr-3 text-right">{formatKes(it.unitPrice)}</td>
@@ -477,7 +486,17 @@ export function OrderDetailModal({ orderId, onClose, onChanged }: Props) {
                         <button
                           className="admin-btn admin-btn-ghost w-full"
                           disabled={updatingStatus || cancelling || selectedStatus === o.status}
-                          onClick={handleStatusUpdate}
+                          onClick={() => {
+                            // Marking PAID by hand (bank transfer, Till/Cash) needs a receipt
+                            // reference — routed through the same required-reference modal the
+                            // Stuck Payments page already uses, rather than firing the status
+                            // change straight away like every other transition here does.
+                            if (selectedStatus === "PAID" && o.paymentStatus !== "PAID") {
+                              setShowMarkPaidModal(true);
+                            } else {
+                              void handleStatusUpdate();
+                            }
+                          }}
                         >
                           {updatingStatus && <Loader2 size={14} className="mr-1 animate-spin inline" />}
                           {selectedStatus === o.status ? "Current status" : `Set to ${statusLabel(selectedStatus)}`}
@@ -647,5 +666,15 @@ export function OrderDetailModal({ orderId, onClose, onChanged }: Props) {
         )}
       </DialogContent>
     </Dialog>
+    {showMarkPaidModal && o && (
+      <MarkPaidModal
+        orderReference={o.reference}
+        amount={o.total}
+        busy={updatingStatus}
+        onConfirm={(referenceNote) => void handleStatusUpdate(referenceNote)}
+        onCancel={() => setShowMarkPaidModal(false)}
+      />
+    )}
+    </>
   );
 }

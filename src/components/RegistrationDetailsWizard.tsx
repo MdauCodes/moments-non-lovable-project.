@@ -6,6 +6,7 @@ import { ConsentCheckbox } from "@/components/ConsentCheckbox";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { useBotDefenseFields, HoneypotField } from "@/hooks/useBotDefense";
 import { api } from "@/services/api";
+import { passwordStore } from "@/services/passwordStore";
 import { apiUrl, getSessionId } from "@/config/api";
 import { PRIVACY_POLICY_VERSION } from "@/lib/policyVersion";
 import type { AuthUser } from "@/contexts/AuthContext";
@@ -57,6 +58,16 @@ export function RegistrationDetailsWizard({
   const [emailError, setEmailError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState("");
   const { honeypot, setHoneypot, toPayload } = useBotDefenseFields();
+
+  // Set once register() responds with requiresVerification: true — the account exists but isn't
+  // logged in yet, so the wizard blocks here on a mandatory OTP step instead of calling onSuccess
+  // (which every caller treats as "now logged in"). Keeping this self-contained here means
+  // neither of the two screens that render this wizard (/account/register, AuthModal) needs to
+  // know verification exists at all.
+  const [pendingVerification, setPendingVerification] = useState<{ email: string; firstName: string } | null>(null);
+  const [otp, setOtp] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const inputCls = compact
@@ -136,9 +147,17 @@ export function RegistrationDetailsWizard({
         }
         throw new Error(message);
       }
+      const trimmedFirstName = firstName.trim() || "there";
+      if ((data as { requiresVerification?: boolean }).requiresVerification) {
+        setPendingVerification({ email: email.trim(), firstName: trimmedFirstName });
+        toast.success("Almost there — we sent a 6-digit code to your email.");
+        return;
+      }
+      // Defensive fallback only — the backend always sets requiresVerification on a fresh
+      // register() now, so this branch shouldn't run in practice.
       onSuccess({
         user: (data as { user?: AuthUser }).user ?? null,
-        firstName: firstName.trim() || "there",
+        firstName: trimmedFirstName,
       });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Registration failed");
@@ -147,7 +166,82 @@ export function RegistrationDetailsWizard({
     }
   }
 
+  async function verifyOtp(e: FormEvent) {
+    e.preventDefault();
+    if (!pendingVerification || otp.length !== 6) return;
+    setVerifying(true);
+    try {
+      const res = await passwordStore.verifyEmailOtp(pendingVerification.email, otp);
+      if (!res.ok) {
+        toast.error(res.message ?? "Invalid or expired code");
+        return;
+      }
+      onSuccess({ user: res.data?.user ?? null, firstName: pendingVerification.firstName });
+    } finally {
+      setVerifying(false);
+    }
+  }
+
+  async function resendOtp() {
+    if (!pendingVerification) return;
+    setResending(true);
+    try {
+      const res = await passwordStore.sendVerificationOtp(pendingVerification.email);
+      toast[res.ok ? "success" : "error"](res.ok ? "Code resent — check your email" : (res.message ?? "Couldn't resend the code"));
+    } finally {
+      setResending(false);
+    }
+  }
+
   const stepLabel = `Step ${step} of ${totalSteps}`;
+
+  if (pendingVerification) {
+    return (
+      <form onSubmit={verifyOtp} className={compact ? "space-y-3" : "space-y-4"}>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Verify your email</p>
+        <p className="text-sm text-muted-foreground">
+          Enter the 6-digit code we sent to <span className="font-medium text-foreground">{pendingVerification.email}</span>{" "}
+          to finish creating your account.
+        </p>
+        <input
+          value={otp}
+          onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          placeholder="6-digit code"
+          inputMode="numeric"
+          autoFocus
+          className={`${inputCls} tracking-[0.4em] text-center text-lg`}
+        />
+        <button
+          type="submit"
+          disabled={verifying || otp.length !== 6}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+        >
+          {verifying && <InlineProgress size="sm" />} Verify and continue
+        </button>
+        <button
+          type="button"
+          onClick={resendOtp}
+          disabled={resending}
+          className="w-full text-center text-xs font-semibold text-muted-foreground underline underline-offset-2 hover:text-foreground disabled:opacity-60"
+        >
+          {resending ? "Sending…" : "Didn't get it? Resend code"}
+        </button>
+        {/* Escape hatch for a mistyped email — without this, a typo here is a permanent dead
+            end: register() no longer issues a session, so there's no other way back to the form
+            to fix it. Doesn't delete the stray unverified account (nothing to gain from that
+            over just letting it sit unverified), only lets the customer retry with a corrected
+            address instead of being stuck staring at a code that can never arrive. */}
+        <button
+          type="button"
+          onClick={() => setPendingVerification(null)}
+          disabled={resending}
+          className="w-full text-center text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground disabled:opacity-60"
+        >
+          Wrong email? Go back and re-enter your details
+        </button>
+      </form>
+    );
+  }
 
   return (
     <div className={compact ? "space-y-3" : "space-y-4"}>

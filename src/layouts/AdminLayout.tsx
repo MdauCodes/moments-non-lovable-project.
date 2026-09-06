@@ -35,7 +35,6 @@ import {
   FileCheck2,
   ClipboardCheck,
   Wrench,
-  ScrollText,
   Coins,
   ListTree,
   LayoutGrid,
@@ -220,9 +219,8 @@ const navSections: NavSection[] = [
   {
     label: "Developer",
     items: [
-      { label: "Developer Tools", to: "/admin/dev-tools", icon: Wrench, superAdminOnly: true },
+      { label: "Developer", to: "/admin/developer", icon: Wrench, superAdminOnly: true },
       { label: "Product Images (AI)", to: "/admin/product-images", icon: Image, adminOnly: true },
-      { label: "Dev Logs", to: "/admin/dev-logs", icon: ScrollText, superAdminOnly: true },
     ],
   },
 ];

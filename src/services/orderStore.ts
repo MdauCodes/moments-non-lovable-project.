@@ -135,7 +135,10 @@ export interface CustomerOrder {
 }
 
 export interface PlaceOrderInput {
-  items: CartItem[];
+  /** variantNote is optional and lives only on this submission shape, not on CartItem itself —
+   *  it's checkout-step state (see checkout.tsx's itemNotes), never part of the persisted/synced
+   *  cart. */
+  items: (CartItem & { variantNote?: string })[];
   customer: {
     name: string;
     email: string;
@@ -352,6 +355,10 @@ export const orderStore = {
         finish: it.finish,
         tierId: it.tierId ?? undefined,
         unitPrice: it.unitPrice,
+        // The Confirm-items checkout step's optional colour/style note — see CheckoutRequest.
+        // InlineItem.variantNote server-side. Omitted entirely rather than sent as "" so an
+        // untouched field never creates a visible-but-empty note in the admin order view.
+        variantNote: it.variantNote || undefined,
       })),
       shippingFee: input.shippingFee,
     };

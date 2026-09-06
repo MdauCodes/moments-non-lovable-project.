@@ -10,6 +10,14 @@ export interface AuthUser {
   accountType?: "INDIVIDUAL_SHOPPER" | "BUSINESS";
 }
 
+/** login()'s own return shape — a plain AuthUser plus an optional one-off signal from the
+ *  grandfather clause (see backend AuthResponse.verificationGraceLoginsRemaining's Javadoc): set
+ *  only when this login used one of a pre-existing unverified account's grace logins, so the
+ *  login form can nudge them to verify soon instead of saying nothing until the login that
+ *  finally gets rejected. Never persisted on `user` in context state — read once, right after
+ *  login(), then discarded. */
+export type LoggedInUser = AuthUser & { verificationGraceLoginsRemaining?: number };
+
 interface AuthContextValue {
   user: AuthUser | null;
   /** No longer a real bearer token — the session lives in an httpOnly cookie this code can't
@@ -20,7 +28,7 @@ interface AuthContextValue {
   isCustomer: boolean;
   isStaff: boolean;
   isAdmin: boolean;
-  login: (email: string, password: string, turnstileToken?: string) => Promise<AuthUser | null>;
+  login: (email: string, password: string, turnstileToken?: string) => Promise<LoggedInUser | null>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<string | null>;
   /** Called after register/verify-email — the backend already set the session cookie in its
@@ -282,7 +290,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSessionActive(true);
     setUser(nextUser);
     setLoginSessionId(mintLoginSessionNonce());
-    return nextUser;
+    const graceLoginsRemaining = (data as { verificationGraceLoginsRemaining?: number }).verificationGraceLoginsRemaining;
+    return graceLoginsRemaining != null ? { ...nextUser, verificationGraceLoginsRemaining: graceLoginsRemaining } : nextUser;
   };
 
   const setSession = (nextUser: AuthUser) => {

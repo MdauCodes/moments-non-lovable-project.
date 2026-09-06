@@ -20,6 +20,7 @@ import {
 import { SiteLayout } from "@/components/SiteLayout";
 import { TikTokIcon } from "@/components/icons/TikTokIcon";
 import { LogoLeafIcon } from "@/components/icons/LogoLeafIcon";
+import logoUrl from "@/assets/moments_logo_without_background.png";
 import { api } from "@/services/api";
 import { filterVisibleIndustries, type Industry } from "@/data/products";
 import pdfAsset from "@/assets/company-profile/moments-company-profile.pdf";
@@ -239,7 +240,7 @@ function CompanyProfilePage() {
       {/* ─── ABOUT US ─── */}
       <section className="relative" style={{ background: FOREST_DEEP }}>
         <div className="mx-auto max-w-4xl px-5 py-16 lg:px-8">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.32em]" style={{ color: GOLD }}>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.32em]" style={{ color: GOLD }}>
             About Us
           </p>
           <h2 className="mt-3 font-display text-3xl font-medium text-white sm:text-4xl lg:text-5xl">
@@ -251,10 +252,12 @@ function CompanyProfilePage() {
             <span className="block h-px w-12" style={{ background: GOLD }} />
           </div>
           <p className="mt-5 text-justify text-base leading-relaxed text-white/85">
-            <LogoLeafIcon size={16} className="mr-1 inline-block align-text-bottom" />
-            <span className="font-semibold" style={{ color: GOLD_SOFT }}>
-              Moments Packaging (K) Ltd
-            </span>{" "}
+            <img
+              src={logoUrl}
+              alt="Moments Packaging (K) Ltd"
+              className="mr-1.5 inline-block align-text-bottom"
+              style={{ height: "1.9em", width: "auto" }}
+            />{" "}
             is a customer-focused packaging solutions company based in Nairobi. We offer a wide range of supplies
             designed for everyday business needs across food, beverages, cosmetics, retail and more. With a focus on
             reliability, convenience and excellent customer service, we deliver innovative packaging countrywide while
@@ -306,7 +309,7 @@ function CompanyProfilePage() {
               <div key={c.tag}>
                 <div className="flex items-center gap-3">
                   <span className="inline-block h-2 w-2 rotate-45" style={{ background: GOLD }} />
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.3em]" style={{ color: GOLD }}>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.32em]" style={{ color: GOLD }}>
                     {c.tag}
                   </p>
                 </div>
@@ -324,7 +327,7 @@ function CompanyProfilePage() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.32em]" style={{ color: GOLD }}>
               Our Values
             </p>
-            <h2 className="mt-3 font-display text-3xl font-medium text-white sm:text-4xl">What we stand for.</h2>
+            <h2 className="mt-3 font-display text-3xl font-medium text-white sm:text-4xl lg:text-5xl">What we stand for.</h2>
             <div className="mt-4 flex items-center gap-3">
               <span className="block h-px w-12" style={{ background: GOLD }} />
               <Leaf className="h-4 w-4" style={{ color: GOLD }} />
@@ -466,10 +469,10 @@ function CompanyProfilePage() {
       <section className="relative" style={{ background: FOREST }}>
         <div className="mx-auto max-w-3xl px-5 py-16 lg:px-8 lg:py-20">
           <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.32em]" style={{ color: GOLD }}>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.32em]" style={{ color: GOLD }}>
               Get in touch
             </p>
-            <h2 className="mt-3 font-display text-4xl font-medium text-white sm:text-5xl lg:text-6xl">Contact Us</h2>
+            <h2 className="mt-3 font-display text-3xl font-medium text-white sm:text-4xl lg:text-5xl">Contact Us</h2>
             <div className="mt-5 h-px w-16" style={{ background: GOLD }} />
 
             <div className="mt-8 space-y-5">
