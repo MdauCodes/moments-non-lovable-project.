@@ -226,6 +226,19 @@ export function RegistrationDetailsWizard({
         >
           {resending ? "Sending…" : "Didn't get it? Resend code"}
         </button>
+        {/* Escape hatch for a mistyped email — without this, a typo here is a permanent dead
+            end: register() no longer issues a session, so there's no other way back to the form
+            to fix it. Doesn't delete the stray unverified account (nothing to gain from that
+            over just letting it sit unverified), only lets the customer retry with a corrected
+            address instead of being stuck staring at a code that can never arrive. */}
+        <button
+          type="button"
+          onClick={() => setPendingVerification(null)}
+          disabled={resending}
+          className="w-full text-center text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground disabled:opacity-60"
+        >
+          Wrong email? Go back and re-enter your details
+        </button>
       </form>
     );
   }
