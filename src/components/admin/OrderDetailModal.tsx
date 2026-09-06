@@ -365,6 +365,11 @@ export function OrderDetailModal({ orderId, onClose, onChanged }: Props) {
                           <td className="py-2 pr-3 text-muted-foreground">{it.category ?? "—"}</td>
                           <td className="py-2 pr-3 text-muted-foreground text-xs">
                             {[it.size, it.material, it.finish].filter(Boolean).join(" · ") || "—"}
+                            {it.variantNote && (
+                              <div className="mt-1 rounded bg-amber-50 px-1.5 py-1 italic text-amber-800">
+                                "{it.variantNote}"
+                              </div>
+                            )}
                           </td>
                           <td className="py-2 pr-3 text-right">{Number(it.qty ?? 0)}</td>
                           <td className="py-2 pr-3 text-right">{formatKes(it.unitPrice)}</td>

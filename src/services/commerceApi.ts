@@ -74,6 +74,9 @@ function normalizeOrder(raw: any): OrderRecord {
     size: it.size,
     material: it.material,
     finish: it.finish,
+    // Optional colour/style note from the checkout Confirm-items step — see
+    // OrderItemDto.variantNote server-side.
+    variantNote: it.variantNote,
     lineTotal: num(it.lineTotal ?? num(it.unitPrice) * num(it.quantity ?? it.qty)),
   }));
 
